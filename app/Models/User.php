@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -18,10 +21,13 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name
  * @property string $email
  * @property CarbonInterface|null $email_verified_at
+ * @property UserRole $role
+ * @property UserStatus $status
  * @property string $password
  * @property string|null $remember_token
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
+ * @property CarbonInterface|null $deleted_at
  */
 final class User extends Authenticatable implements MustVerifyEmail
 {
@@ -32,6 +38,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 
     use HasUlids;
     use Notifiable;
+    use SoftDeletes;
 
     /**
      * @var list<string>
@@ -40,6 +47,8 @@ final class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role',
+        'status',
     ];
 
     /**
@@ -57,9 +66,12 @@ final class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'role' => UserRole::class,
+            'status' => UserStatus::class,
             'password' => 'hashed',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
         ];
     }
 }
