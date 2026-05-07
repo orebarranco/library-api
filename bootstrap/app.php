@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Exceptions\ApiExceptionHandler;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\HasRole;
 use App\Http\Middleware\SetApiVersion;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'api.version' => SetApiVersion::class,
             'verified' => EnsureEmailIsVerified::class,
+            'role' => HasRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

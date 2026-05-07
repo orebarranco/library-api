@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 use App\Exceptions\ApiExceptionHandler;
+use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -78,6 +79,13 @@ it('handles AuthorizationException as 403', function (): void {
     expect($response->status())->toBe(Response::HTTP_FORBIDDEN)
         ->and($data['errors'][0]['code'])->toBe('UNAUTHORIZED')
         ->and($data['errors'][0]['title'])->toBe('Unauthorized.');
+});
+it('handles InsufficientPermissionsException as 403', function (): void {
+    $response = $this->handler->render(new InsufficientPermissionsException());
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_FORBIDDEN)
+        ->and($data['errors'][0]['code'])->toBe('INSUFFICIENT_PERMISSIONS');
 });
 it('handles TooManyRequestsHttpException as 429', function (): void {
     $response = $this->handler->render(new TooManyRequestsHttpException());
