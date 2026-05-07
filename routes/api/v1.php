@@ -10,11 +10,19 @@ use App\Http\Controllers\Api\V1\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Auth\ResendEmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\V1\Auth\VerifyEmailController;
+use App\Http\Controllers\Api\V1\Catalog\CategoryController;
 use App\Http\Controllers\Api\V1\Users\IndexController as UsersIndexController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'verified', 'throttle:api'])->prefix('users')->name('users.')->group(function (): void {
     Route::get('/', UsersIndexController::class)->name('index');
+});
+
+Route::prefix('categories')->name('categories.')->group(function (): void {
+    Route::get('/', [CategoryController::class, 'index'])->name('index');
+    Route::middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+    });
 });
 
 Route::prefix('auth')->name('auth.')->group(function (): void {
