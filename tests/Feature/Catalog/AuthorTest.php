@@ -101,6 +101,22 @@ it('librarian can update an author', function (): void {
     expect($author->fresh()->name)->toBe('New Name');
 });
 
+it('librarian can update an author with all fields', function (): void {
+    $author = Author::factory()->create();
+    $librarian = User::factory()->create(['role' => UserRole::Librarian]);
+    Sanctum::actingAs($librarian);
+
+    $this->putJson("{$this->endpoint}/{$author->id}", [
+        'name' => 'Updated Name',
+        'biography' => 'Updated biography',
+        'birth_date' => '1900-06-15',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.attributes.name', 'Updated Name')
+        ->assertJsonPath('data.attributes.biography', 'Updated biography')
+        ->assertJsonPath('data.attributes.birth_date', '1900-06-15T00:00:00.000000Z');
+});
+
 it('returns 404 for non-existent author on update', function (): void {
     $librarian = User::factory()->create(['role' => UserRole::Librarian]);
     Sanctum::actingAs($librarian);
