@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions;
 
 use App\Exceptions\Auth\EmailNotVerifiedException;
+use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
 use App\Exceptions\Auth\InvalidPasswordResetTokenException;
 use App\Traits\ApiResponse;
@@ -15,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
@@ -32,11 +34,13 @@ final class ApiExceptionHandler
             $e instanceof InvalidPasswordResetTokenException => $this->handleInvalidPasswordResetToken($e),
             $e instanceof EmailNotVerifiedException => $this->handleEmailNotVerified(),
             $e instanceof AuthenticationException => $this->handleAuthentication(),
+            $e instanceof InsufficientPermissionsException => $this->handleInsufficientPermissions(),
             $e instanceof AuthorizationException => $this->handleAuthorization(),
             $e instanceof ModelNotFoundException,
             $e instanceof NotFoundHttpException => $this->handleNotFound(),
             $e instanceof TooManyRequestsHttpException => $this->handleThrottle(),
             $e instanceof InvalidSignatureException => $this->handleInvalidSignature(),
+            $e instanceof AccessDeniedHttpException && $e->getPrevious() instanceof InsufficientPermissionsException => $this->handleInsufficientPermissions(),
             $e instanceof HttpException => $this->handleHttp($e),
             default => $this->handleGeneric($e),
         };
@@ -84,6 +88,16 @@ final class ApiExceptionHandler
             code: 'UNAUTHENTICATED',
             detail: 'Authentication is required to access this resource.',
             status: Response::HTTP_UNAUTHORIZED,
+        );
+    }
+
+    private function handleInsufficientPermissions(): JsonResponse
+    {
+        return $this->error(
+            message: 'Forbidden.',
+            code: 'INSUFFICIENT_PERMISSIONS',
+            detail: 'You do not have the required role to access this resource.',
+            status: Response::HTTP_FORBIDDEN,
         );
     }
 
