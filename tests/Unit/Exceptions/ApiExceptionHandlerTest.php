@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 use App\Exceptions\ApiExceptionHandler;
+use App\Exceptions\Auth\AccountSuspendedException;
+use App\Exceptions\Auth\EmailNotVerifiedException;
 use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -46,6 +49,15 @@ it('handles ValidationException with field errors', function (): void {
         ->and($data['errors'][0]['code'])->toBe('VALIDATION_ERROR')
         ->and($data['errors'][0]['source']['pointer'])->toBe('/data/attributes/email');
 });
+it('handles AccountSuspendedException as 403', function (): void {
+    $response = $this->handler->render(new AccountSuspendedException());
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_FORBIDDEN)
+        ->and($data['errors'][0]['code'])->toBe('ACCOUNT_SUSPENDED')
+        ->and($data['errors'][0]['detail'])->toBe('Your account has been suspended. Please contact support.');
+});
+
 it('handles InvalidCredentialsException as 401', function (): void {
     $response = $this->handler->render(new InvalidCredentialsException());
     $data = $response->getData(true);
@@ -54,6 +66,24 @@ it('handles InvalidCredentialsException as 401', function (): void {
         ->and($data['errors'][0]['code'])->toBe('INVALID_CREDENTIALS')
         ->and($data['errors'][0]['detail'])->toBe('The provided credentials are incorrect.');
 });
+it('handles EmailNotVerifiedException as 403', function (): void {
+    $response = $this->handler->render(new EmailNotVerifiedException());
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_FORBIDDEN)
+        ->and($data['errors'][0]['code'])->toBe('EMAIL_NOT_VERIFIED')
+        ->and($data['errors'][0]['detail'])->toBe('You must verify your email address before accessing this resource.');
+});
+
+it('handles InvalidSignatureException as 403', function (): void {
+    $response = $this->handler->render(new InvalidSignatureException());
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_FORBIDDEN)
+        ->and($data['errors'][0]['code'])->toBe('INVALID_SIGNATURE')
+        ->and($data['errors'][0]['detail'])->toBe('The verification link is invalid or has expired.');
+});
+
 it('handles AuthenticationException', function (): void {
     $response = $this->handler->render(new AuthenticationException());
 
