@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use App\Exceptions\Auth\AccountSuspendedException;
 use App\Exceptions\Auth\EmailNotVerifiedException;
 use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
@@ -30,6 +31,7 @@ final class ApiExceptionHandler
     {
         return match (true) {
             $e instanceof ValidationException => $this->handleValidation($e),
+            $e instanceof AccountSuspendedException => $this->handleAccountSuspended(),
             $e instanceof InvalidCredentialsException => $this->handleInvalidCredentials($e),
             $e instanceof InvalidPasswordResetTokenException => $this->handleInvalidPasswordResetToken($e),
             $e instanceof EmailNotVerifiedException => $this->handleEmailNotVerified(),
@@ -48,7 +50,17 @@ final class ApiExceptionHandler
 
     private function handleValidation(ValidationException $e): JsonResponse
     {
-        return $this->validationError($e->errors(), $e->getMessage());
+        return $this->validationError($e->errors());
+    }
+
+    private function handleAccountSuspended(): JsonResponse
+    {
+        return $this->error(
+            message: 'Account suspended.',
+            code: 'ACCOUNT_SUSPENDED',
+            detail: 'Your account has been suspended. Please contact support.',
+            status: Response::HTTP_FORBIDDEN,
+        );
     }
 
     private function handleInvalidCredentials(InvalidCredentialsException $e): JsonResponse
