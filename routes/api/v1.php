@@ -12,11 +12,17 @@ use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\V1\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\V1\Catalog\AuthorController;
 use App\Http\Controllers\Api\V1\Catalog\CategoryController;
-use App\Http\Controllers\Api\V1\Users\IndexController as UsersIndexController;
+use App\Http\Controllers\Api\V1\User\AssignRoleController;
+use App\Http\Controllers\Api\V1\User\SuspendUserController;
+use App\Http\Controllers\Api\V1\User\UnsuspendUserController;
+use App\Http\Controllers\Api\V1\User\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum', 'verified', 'throttle:api'])->prefix('users')->name('users.')->group(function (): void {
-    Route::get('/', UsersIndexController::class)->name('index');
+Route::middleware(['auth:sanctum', 'verified', 'role:admin', 'throttle:api'])->prefix('users')->name('users.')->group(function (): void {
+    Route::apiResource('/', UserController::class)->parameters(['' => 'user']);
+    Route::post('/{user}/suspend', SuspendUserController::class)->name('suspend');
+    Route::post('/{user}/unsuspend', UnsuspendUserController::class)->name('unsuspend');
+    Route::put('/{user}/role', AssignRoleController::class)->name('assign-role');
 });
 
 Route::prefix('authors')->name('authors.')->group(function (): void {
