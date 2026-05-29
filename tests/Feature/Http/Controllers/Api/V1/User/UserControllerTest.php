@@ -74,6 +74,7 @@ describe('index', function (): void {
         $response = $this->getJson($this->endpoint.'?filter[name]=Alice');
 
         $response->assertSuccessful();
+
         $names = collect($response->json('data'))->pluck('attributes.name');
         expect($names)->each->toContain('Alice');
         expect($response->json('meta.pagination.total'))->toBe(1);
@@ -87,6 +88,7 @@ describe('index', function (): void {
         $response = $this->getJson($this->endpoint.'?filter[email]=alice');
 
         $response->assertSuccessful();
+
         expect($response->json('meta.pagination.total'))->toBe(1);
     });
 
@@ -98,6 +100,7 @@ describe('index', function (): void {
         $response = $this->getJson($this->endpoint.'?sort=name');
 
         $response->assertSuccessful();
+
         $names = collect($response->json('data'))->pluck('attributes.name')->values()->all();
         expect($names)->toBe(collect($names)->sort()->values()->all());
     });
@@ -110,6 +113,7 @@ describe('index', function (): void {
         $response = $this->getJson($this->endpoint.'?sort=-name');
 
         $response->assertSuccessful();
+
         $names = collect($response->json('data'))->pluck('attributes.name')->values()->all();
         expect($names)->toBe(collect($names)->sortDesc()->values()->all());
     });

@@ -72,7 +72,7 @@ it('hashes the password', function (): void {
     $result = $this->action->execute($dto);
 
     expect($result->password)->not->toBe('plaintext')
-        ->and(password_verify('plaintext', $result->password))->toBeTrue();
+        ->and(password_verify('plaintext', (string) $result->password))->toBeTrue();
 });
 
 it('persists user with a ULID id', function (): void {
