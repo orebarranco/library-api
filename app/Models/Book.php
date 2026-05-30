@@ -6,12 +6,10 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\BookFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -27,7 +25,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonInterface|null $updated_at
  * @property-read Author $author
  * @property-read Category $category
- * @property-read int $available_copies
  */
 final class Book extends Model
 {
@@ -73,23 +70,5 @@ final class Book extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
-    }
-
-    /** @return HasMany<BookCopy, $this> */
-    public function copies(): HasMany
-    {
-        return $this->hasMany('App\Models\BookCopy');
-    }
-
-    /** @return HasMany<Reservation, $this> */
-    public function reservations(): HasMany
-    {
-        return $this->hasMany('App\Models\Reservation');
-    }
-
-    /** @return Attribute<int, never> */
-    protected function availableCopies(): Attribute
-    {
-        return Attribute::get(fn (): int => 0); // Stub until Module 6
     }
 }

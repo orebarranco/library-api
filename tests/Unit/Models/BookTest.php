@@ -6,7 +6,6 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('to array', function (): void {
@@ -31,28 +30,6 @@ test('belongs to category', function (): void {
     expect($book->category)->toBeInstanceOf(Category::class);
 });
 
-test('has many copies', function (): void {
-    $book = new Book;
-
-    // Verify the method exists and returns HasMany without instantiating the unresolved model
-    expect(method_exists($book, 'copies'))->toBeTrue();
-
-    $relation = $book->copies();
-    expect($relation)->toBeInstanceOf(HasMany::class);
-    expect($relation->getForeignKeyName())->toBe('book_id');
-})->skip('BookCopy model does not exist yet — implemented in Module 6');
-
-test('has many reservations', function (): void {
-    $book = new Book;
-
-    // Verify the method exists and returns HasMany without instantiating the unresolved model
-    expect(method_exists($book, 'reservations'))->toBeTrue();
-
-    $relation = $book->reservations();
-    expect($relation)->toBeInstanceOf(HasMany::class);
-    expect($relation->getForeignKeyName())->toBe('book_id');
-})->skip('Reservation model does not exist yet — implemented in a later module');
-
 test('uses soft deletes', function (): void {
     $book = Book::factory()->create();
 
@@ -62,12 +39,6 @@ test('uses soft deletes', function (): void {
 
     expect(Book::withTrashed()->find($book->id))->not->toBeNull();
     expect(Book::find($book->id))->toBeNull();
-});
-
-test('available copies accessor returns 0 as stub', function (): void {
-    $book = Book::factory()->create();
-
-    expect($book->available_copies)->toBe(0);
 });
 
 test('factory creates valid book with author and category', function (): void {

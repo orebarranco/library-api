@@ -134,15 +134,6 @@ it('sort by popularity returns books (stub: no error)', function (): void {
         ->assertSuccessful();
 });
 
-it('response includes available_copies count as 0', function (): void {
-    Book::factory()->create();
-
-    $response = $this->getJson($this->endpoint)
-        ->assertSuccessful();
-
-    expect($response->json('data.0.attributes.available_copies'))->toBe(0);
-});
-
 it('response uses JSON:API format with type books', function (): void {
     Book::factory()->create();
 
@@ -242,7 +233,7 @@ it('returns 201 with JSON:API book resource on success', function (): void {
 
     $response->assertCreated()
         ->assertJsonStructure([
-            'data' => ['type', 'id', 'attributes' => ['title', 'isbn', 'available_copies']],
+            'data' => ['type', 'id', 'attributes' => ['title', 'isbn']],
             'meta',
         ]);
 

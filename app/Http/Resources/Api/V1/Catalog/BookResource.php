@@ -20,7 +20,6 @@ final class BookResource extends JsonApiResource
         'isbn',
         'publication_year',
         'book_value',
-        'available_copies',
     ];
 
     /**
