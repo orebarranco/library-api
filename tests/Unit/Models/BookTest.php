@@ -38,7 +38,7 @@ test('uses soft deletes', function (): void {
     $book->delete();
 
     expect(Book::withTrashed()->find($book->id))->not->toBeNull();
-    expect(Book::find($book->id))->toBeNull();
+    expect(Book::query()->find($book->id))->toBeNull();
 });
 
 test('factory creates valid book with author and category', function (): void {

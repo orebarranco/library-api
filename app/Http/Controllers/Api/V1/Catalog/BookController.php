@@ -12,6 +12,7 @@ use App\Http\Requests\Api\V1\Catalog\UpdateBookRequest;
 use App\Http\Resources\Api\V1\Catalog\BookResource;
 use App\Models\Book;
 use App\Traits\ApiResponse;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
@@ -24,27 +25,24 @@ final class BookController
 
     public function index(): JsonResponse
     {
-        $books = QueryBuilder::for(Book::class)
+        $books = QueryBuilder::for(Book::with(['author', 'category']))
             ->allowedFilters(
                 AllowedFilter::exact('author_id'),
                 AllowedFilter::exact('category_id'),
-                AllowedFilter::callback('search', function ($query, $value): void {
-                    $query->where(function ($q) use ($value): void {
+                AllowedFilter::callback('search', function (Builder $query, string $value): void {
+                    $query->where(function (Builder $q) use ($value): void {
                         $q->where('title', 'like', "%{$value}%")
                             ->orWhere('isbn', 'like', "%{$value}%")
                             ->orWhere('publisher', 'like', "%{$value}%")
-                            ->orWhereHas('author', fn ($q2) => $q2->where('name', 'like', "%{$value}%"));
+                            ->orWhereHas('author', fn (Builder $q2) => $q2->where('name', 'like', "%{$value}%"));
                     });
                 }),
-                AllowedFilter::callback('available_only', fn ($query, $value) => null), // No-op until Module 6
             )
             ->allowedSorts(
                 AllowedSort::field('title'),
                 AllowedSort::field('publication_year'),
                 AllowedSort::field('created_at'),
-                AllowedSort::callback('popularity', fn ($query, $descending) => null), // No-op until Module 7
             )
-            ->with(['author', 'category'])
             ->defaultSort('title')
             ->paginate(15);
 

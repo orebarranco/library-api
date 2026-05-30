@@ -108,13 +108,6 @@ it('filter by author_id returns correct books', function (): void {
         ->assertJsonCount(2, 'data');
 });
 
-it('filter available_only excludes books with no available copies (stub: returns all books, no error)', function (): void {
-    Book::factory()->count(3)->create();
-
-    $this->getJson($this->endpoint.'?filter[available_only]=1')
-        ->assertSuccessful();
-});
-
 it('sort by title ascending works', function (): void {
     Book::factory()->create(['title' => 'Zebra']);
     Book::factory()->create(['title' => 'Apple']);
@@ -125,13 +118,6 @@ it('sort by title ascending works', function (): void {
 
     $titles = collect($response->json('data'))->pluck('attributes.title')->values()->toArray();
     expect($titles[0])->toBe('Apple');
-});
-
-it('sort by popularity returns books (stub: no error)', function (): void {
-    Book::factory()->count(3)->create();
-
-    $this->getJson($this->endpoint.'?sort=popularity')
-        ->assertSuccessful();
 });
 
 it('response uses JSON:API format with type books', function (): void {
@@ -359,7 +345,7 @@ it('librarian can soft-delete a book with no active loans', function (): void {
         ->assertNoContent();
 
     expect(Book::withTrashed()->find($book->id)->deleted_at)->not->toBeNull();
-    expect(Book::find($book->id))->toBeNull();
+    expect(Book::query()->find($book->id))->toBeNull();
 });
 
 it('returns 409 BOOK_HAS_ACTIVE_LOANS when book has active loans', function (): void {

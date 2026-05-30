@@ -12,10 +12,8 @@ final class UpdateBookAction
 {
     public function execute(Book $book, UpdateBookDTO $data): Book
     {
-        if ($data->isbn !== null && $data->isbn !== $book->isbn) {
-            if (Book::query()->where('isbn', $data->isbn)->exists()) {
-                throw new DuplicateIsbnException($data->isbn);
-            }
+        if ($data->isbn !== null && $data->isbn !== $book->isbn && Book::query()->where('isbn', $data->isbn)->exists()) {
+            throw new DuplicateIsbnException($data->isbn);
         }
 
         $attributes = array_filter([
@@ -25,7 +23,7 @@ final class UpdateBookAction
             'book_value' => $data->book_value,
             'author_id' => $data->author_id,
             'category_id' => $data->category_id,
-        ], fn ($value) => $value !== null);
+        ], fn (mixed $value): bool => $value !== null);
 
         $book->update($attributes);
 

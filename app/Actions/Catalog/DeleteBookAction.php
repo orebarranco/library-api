@@ -8,10 +8,10 @@ use App\Contracts\LoanChecker;
 use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Models\Book;
 
-final class DeleteBookAction
+final readonly class DeleteBookAction
 {
     public function __construct(
-        private readonly LoanChecker $loanChecker,
+        private LoanChecker $loanChecker,
     ) {}
 
     public function execute(Book $book): void

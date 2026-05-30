@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\Catalog\UpdateBookAction;
+use App\DTOs\Catalog\UpdateBookDTO;
+use App\Exceptions\Catalog\DuplicateIsbnException;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Category;
+
+beforeEach(function (): void {
+    $this->action = new UpdateBookAction();
+    $this->author = Author::factory()->create();
+    $this->category = Category::factory()->create();
+});
+
+it('updates book with provided fields', function (): void {
+    $book = Book::factory()->create([
+        'title' => 'Original Title',
+        'isbn' => '9780132350884',
+    ]);
+
+    $dto = new UpdateBookDTO(title: 'Updated Title', isbn: null, publication_year: null, book_value: null, author_id: null, category_id: null);
+
+    $result = $this->action->execute($book, $dto);
+
+    expect($result->title)->toBe('Updated Title')
+        ->and($result->isbn)->toBe('9780132350884');
+});
+
+it('throws DuplicateIsbnException when new isbn conflicts with another book', function (): void {
+    Book::factory()->create(['isbn' => '9780201633610']);
+    $book = Book::factory()->create(['isbn' => '9780132350884']);
+
+    $dto = new UpdateBookDTO(title: null, isbn: '9780201633610', publication_year: null, book_value: null, author_id: null, category_id: null);
+
+    expect(fn () => $this->action->execute($book, $dto))
+        ->toThrow(DuplicateIsbnException::class);
+});
+
+it('does not throw when isbn is unchanged', function (): void {
+    $book = Book::factory()->create(['isbn' => '9780132350884']);
+
+    $dto = new UpdateBookDTO(title: 'New Title', isbn: '9780132350884', publication_year: null, book_value: null, author_id: null, category_id: null);
+
+    $result = $this->action->execute($book, $dto);
+
+    expect($result->title)->toBe('New Title');
+});

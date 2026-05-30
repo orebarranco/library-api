@@ -19,7 +19,7 @@ it('soft-deletes book when no active loans', function (): void {
     $action->execute($book);
 
     expect(Book::withTrashed()->find($book->id)->deleted_at)->not->toBeNull();
-    expect(Book::find($book->id))->toBeNull();
+    expect(Book::query()->find($book->id))->toBeNull();
 });
 
 it('throws BookHasActiveLoansException when active loans exist', function (): void {
