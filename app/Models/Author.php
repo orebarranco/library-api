@@ -9,6 +9,7 @@ use Database\Factories\AuthorFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $id
@@ -44,5 +45,11 @@ final class Author extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /** @return HasMany<Book, $this> */
+    public function books(): HasMany
+    {
+        return $this->hasMany(Book::class);
     }
 }
