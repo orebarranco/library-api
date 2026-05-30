@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Api\V1\Catalog;
 use App\Actions\Catalog\CreateBookAction;
 use App\Actions\Catalog\DeleteBookAction;
 use App\Actions\Catalog\UpdateBookAction;
-use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Http\Requests\Api\V1\Catalog\CreateBookRequest;
 use App\Http\Requests\Api\V1\Catalog\UpdateBookRequest;
 use App\Http\Resources\Api\V1\Catalog\BookResource;
@@ -77,18 +76,7 @@ final class BookController
 
     public function destroy(Book $book, DeleteBookAction $action): JsonResponse
     {
-        try {
-            $action->execute($book);
-        } catch (BookHasActiveLoansException $e) {
-            return response()->json([
-                'errors' => [[
-                    'status' => (string) Response::HTTP_CONFLICT,
-                    'code' => 'BOOK_HAS_ACTIVE_LOANS',
-                    'title' => 'Book Has Active Loans',
-                    'detail' => $e->getMessage(),
-                ]],
-            ], Response::HTTP_CONFLICT, ['Content-Type' => 'application/vnd.api+json']);
-        }
+        $action->execute($book);
 
         return $this->noData(Response::HTTP_NO_CONTENT);
     }
