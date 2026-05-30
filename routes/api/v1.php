@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Auth\ResendEmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\V1\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\V1\Catalog\AuthorController;
+use App\Http\Controllers\Api\V1\Catalog\BookController;
 use App\Http\Controllers\Api\V1\Catalog\CategoryController;
 use App\Http\Controllers\Api\V1\User\AssignRoleController;
 use App\Http\Controllers\Api\V1\User\SuspendUserController;
@@ -30,6 +31,16 @@ Route::prefix('authors')->name('authors.')->group(function (): void {
     Route::middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
         Route::post('/', [AuthorController::class, 'store'])->name('store');
         Route::put('/{author}', [AuthorController::class, 'update'])->name('update');
+    });
+});
+
+Route::prefix('books')->name('books.')->group(function (): void {
+    Route::get('/', [BookController::class, 'index'])->name('index');
+    Route::get('/{book}', [BookController::class, 'show'])->name('show');
+    Route::middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
+        Route::post('/', [BookController::class, 'store'])->name('store');
+        Route::put('/{book}', [BookController::class, 'update'])->name('update');
+        Route::delete('/{book}', [BookController::class, 'destroy'])->name('destroy');
     });
 });
 
