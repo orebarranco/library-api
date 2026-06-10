@@ -6,6 +6,8 @@ use App\Exceptions\Auth\AccountSuspendedException;
 use App\Exceptions\Auth\EmailNotVerifiedException;
 use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
+use App\Exceptions\Catalog\BookHasActiveLoansException;
+use App\Exceptions\Catalog\DuplicateIsbnException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -49,6 +51,22 @@ it('handles ValidationException with field errors', function (): void {
         ->and($data['errors'][0]['code'])->toBe('VALIDATION_ERROR')
         ->and($data['errors'][0]['source']['pointer'])->toBe('/data/attributes/email');
 });
+it('handles DuplicateIsbnException as 422', function (): void {
+    $response = $this->handler->render(new DuplicateIsbnException('9780132350884'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('DUPLICATE_ISBN');
+});
+
+it('handles BookHasActiveLoansException as 409', function (): void {
+    $response = $this->handler->render(new BookHasActiveLoansException('Clean Code'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_CONFLICT)
+        ->and($data['errors'][0]['code'])->toBe('BOOK_HAS_ACTIVE_LOANS');
+});
+
 it('handles AccountSuspendedException as 403', function (): void {
     $response = $this->handler->render(new AccountSuspendedException());
     $data = $response->getData(true);
