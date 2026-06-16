@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\V1\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\V1\Catalog\AuthorController;
 use App\Http\Controllers\Api\V1\Catalog\BookController;
+use App\Http\Controllers\Api\V1\Catalog\BookCopyController;
 use App\Http\Controllers\Api\V1\Catalog\CategoryController;
 use App\Http\Controllers\Api\V1\User\AssignRoleController;
 use App\Http\Controllers\Api\V1\User\SuspendUserController;
@@ -37,11 +38,18 @@ Route::prefix('authors')->name('authors.')->group(function (): void {
 Route::prefix('books')->name('books.')->group(function (): void {
     Route::get('/', [BookController::class, 'index'])->name('index');
     Route::get('/{book}', [BookController::class, 'show'])->name('show');
+    Route::get('/{book}/copies', [BookController::class, 'copies'])->name('copies');
     Route::middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
         Route::post('/', [BookController::class, 'store'])->name('store');
         Route::put('/{book}', [BookController::class, 'update'])->name('update');
         Route::delete('/{book}', [BookController::class, 'destroy'])->name('destroy');
+        Route::post('/{book}/copies', [BookCopyController::class, 'store'])->name('copies.store');
     });
+});
+
+Route::prefix('book-copies')->name('book-copies.')->middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
+    Route::put('/{bookCopy}/status', [BookCopyController::class, 'updateStatus'])->name('update-status');
+    Route::delete('/{bookCopy}', [BookCopyController::class, 'destroy'])->name('destroy');
 });
 
 Route::prefix('categories')->name('categories.')->group(function (): void {

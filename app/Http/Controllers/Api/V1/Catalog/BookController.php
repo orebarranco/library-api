@@ -9,6 +9,7 @@ use App\Actions\Catalog\DeleteBookAction;
 use App\Actions\Catalog\UpdateBookAction;
 use App\Http\Requests\Api\V1\Catalog\CreateBookRequest;
 use App\Http\Requests\Api\V1\Catalog\UpdateBookRequest;
+use App\Http\Resources\Api\V1\Catalog\BookCopyResource;
 use App\Http\Resources\Api\V1\Catalog\BookResource;
 use App\Models\Book;
 use App\Traits\ApiResponse;
@@ -77,5 +78,12 @@ final class BookController
         $action->execute($book);
 
         return $this->noData(Response::HTTP_NO_CONTENT);
+    }
+
+    public function copies(Book $book): JsonResponse
+    {
+        $copies = $book->copies()->get();
+
+        return $this->successCollection(BookCopyResource::collection($copies));
     }
 }
