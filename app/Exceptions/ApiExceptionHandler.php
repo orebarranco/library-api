@@ -9,6 +9,7 @@ use App\Exceptions\Auth\EmailNotVerifiedException;
 use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
 use App\Exceptions\Auth\InvalidPasswordResetTokenException;
+use App\Exceptions\Catalog\BookCopyHasActiveLoanException;
 use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Exceptions\Catalog\DuplicateIsbnException;
 use App\Traits\ApiResponse;
@@ -35,6 +36,7 @@ final class ApiExceptionHandler
             $e instanceof ValidationException => $this->handleValidation($e),
             $e instanceof DuplicateIsbnException => $this->handleDuplicateIsbn($e),
             $e instanceof BookHasActiveLoansException => $this->handleBookHasActiveLoans($e),
+            $e instanceof BookCopyHasActiveLoanException => $this->handleBookCopyHasActiveLoan($e),
             $e instanceof AccountSuspendedException => $this->handleAccountSuspended(),
             $e instanceof InvalidCredentialsException => $this->handleInvalidCredentials($e),
             $e instanceof InvalidPasswordResetTokenException => $this->handleInvalidPasswordResetToken($e),
@@ -67,6 +69,16 @@ final class ApiExceptionHandler
         return $this->error(
             message: 'Book has active loans.',
             code: 'BOOK_HAS_ACTIVE_LOANS',
+            detail: $e->getMessage(),
+            status: Response::HTTP_CONFLICT,
+        );
+    }
+
+    private function handleBookCopyHasActiveLoan(BookCopyHasActiveLoanException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Book copy has an active loan.',
+            code: 'COPY_HAS_ACTIVE_LOAN',
             detail: $e->getMessage(),
             status: Response::HTTP_CONFLICT,
         );

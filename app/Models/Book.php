@@ -6,10 +6,12 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\BookFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -25,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonInterface|null $updated_at
  * @property-read Author $author
  * @property-read Category $category
+ * @property-read Collection<int, BookCopy> $copies
  */
 final class Book extends Model
 {
@@ -70,5 +73,11 @@ final class Book extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** @return HasMany<BookCopy, $this> */
+    public function copies(): HasMany
+    {
+        return $this->hasMany(BookCopy::class);
     }
 }
