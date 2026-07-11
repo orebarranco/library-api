@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\BookCopyStatus;
 use Carbon\CarbonInterface;
-use Database\Factories\AuthorFactory;
+use Database\Factories\BookCopyFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string $id
- * @property string $name
- * @property string|null $biography
- * @property CarbonInterface|null $birth_date
+ * @property string $book_id
+ * @property string $code
+ * @property BookCopyStatus $status
+ * @property CarbonInterface|null $acquisition_date
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
+ * @property-read Book $book
  */
-final class Author extends Model
+final class BookCopy extends Model
 {
-    /** @use HasFactory<AuthorFactory> */
+    /** @use HasFactory<BookCopyFactory> */
     use HasFactory;
 
     use HasUlids;
@@ -30,9 +33,10 @@ final class Author extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'biography',
-        'birth_date',
+        'book_id',
+        'code',
+        'status',
+        'acquisition_date',
     ];
 
     /**
@@ -41,15 +45,16 @@ final class Author extends Model
     public function casts(): array
     {
         return [
-            'birth_date' => 'date',
+            'status' => BookCopyStatus::class,
+            'acquisition_date' => 'date',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }
 
-    /** @return HasMany<Book, $this> */
-    public function books(): HasMany
+    /** @return BelongsTo<Book, $this> */
+    public function book(): BelongsTo
     {
-        return $this->hasMany(Book::class);
+        return $this->belongsTo(Book::class);
     }
 }

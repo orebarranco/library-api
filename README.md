@@ -2,7 +2,7 @@
 
 > Headless REST API for library management — Laravel 13 · PHP 8.4 · JSON:API
 
-[![Tests](https://github.com/orebarranco/library-api/actions/workflows/ci.yml/badge.svg)](https://github.com/orebarranco/library-api/actions)
+[![Tests](https://github.com/orebarranco/libraryapi/actions/workflows/ci.yml/badge.svg)](https://github.com/orebarranco/libraryapi/actions)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/orebarranco/libraryapi)
 [![PHPStan](https://img.shields.io/badge/PHPStan-max-brightgreen)](https://phpstan.org)
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
