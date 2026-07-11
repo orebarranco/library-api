@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('to array', function (): void {
@@ -28,6 +30,14 @@ test('belongs to category', function (): void {
 
     expect($book->category())->toBeInstanceOf(BelongsTo::class);
     expect($book->category)->toBeInstanceOf(Category::class);
+});
+
+test('has many reservations', function (): void {
+    $book = Book::factory()->create();
+    Reservation::factory()->count(2)->create(['book_id' => $book->id]);
+
+    expect($book->reservations())->toBeInstanceOf(HasMany::class);
+    expect($book->reservations)->toHaveCount(2);
 });
 
 test('uses soft deletes', function (): void {

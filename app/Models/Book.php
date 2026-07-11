@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Author $author
  * @property-read Category $category
  * @property-read Collection<int, BookCopy> $copies
+ * @property-read Collection<int, Reservation> $reservations
  */
 final class Book extends Model
 {
@@ -79,5 +80,11 @@ final class Book extends Model
     public function copies(): HasMany
     {
         return $this->hasMany(BookCopy::class);
+    }
+
+    /** @return HasMany<Reservation, $this> */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 }
