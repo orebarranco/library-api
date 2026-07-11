@@ -55,6 +55,7 @@ Route::prefix('book-copies')->name('book-copies.')->middleware(['auth:sanctum', 
 
 Route::prefix('reservations')->name('reservations.')->middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::get('/', [ReservationController::class, 'index'])->name('index');
+    Route::post('/', [ReservationController::class, 'store'])->name('store');
     Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
 });
 
