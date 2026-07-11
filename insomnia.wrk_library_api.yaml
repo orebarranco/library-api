@@ -1,0 +1,960 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Library API
+meta:
+  id: wrk_library_api
+  created: 1700000000000
+  modified: 1700000000000
+  description: Library Management REST API
+collection:
+  - name: Auth
+    meta:
+      id: fld_auth
+      created: 1700000300000
+      modified: 1781095340968
+      sortKey: -3000000
+      description: Authentication and user management
+    children:
+      - url: "{{ base_url }}/auth/register"
+        name: Register
+        meta:
+          id: req_auth_register
+          created: 1700000700000
+          modified: 1781095387647
+          isPrivate: false
+          description: ""
+          sortKey: -1100000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name": "Oreste Barranco",
+            	"email": "orebarranco90@example.com",
+            	"password": "password",
+            	"password_confirmation": "password"
+            }
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/auth/login"
+        name: Login
+        meta:
+          id: req_auth_login
+          created: 1700000800000
+          modified: 1781095371364
+          isPrivate: false
+          description: ""
+          sortKey: -1200000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "orebarranco90@example.com",
+            	"password": "password"
+            }
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        scripts:
+          afterResponse: |-
+            const body = insomnia.response.body;
+            if (!body) return;
+            try {
+              const data = JSON.parse(body);
+              if (data.meta?.token) {
+                insomnia.environment.set('token', data.meta.token);
+                console.log('Token set successfully');
+              }
+            } catch (e) {
+              console.error('Failed to parse login response', e);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/auth/me"
+        name: Me
+        meta:
+          id: req_auth_me
+          created: 1700000900000
+          modified: 1781092645393
+          isPrivate: false
+          description: ""
+          sortKey: -1300000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/auth/logout"
+        name: Logout
+        meta:
+          id: req_auth_logout
+          created: 1700001000000
+          modified: 1700001000000
+          isPrivate: false
+          description: ""
+          sortKey: -1400000
+        method: POST
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            insomnia.environment.set('token', '');
+            console.log('Token cleared');
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/auth/forgot-password"
+        name: Forgot Password
+        meta:
+          id: req_auth_forgot_password
+          created: 1700001100000
+          modified: 1700001100000
+          isPrivate: false
+          description: ""
+          sortKey: -1500000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"email":"john@example.com"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/auth/reset-password"
+        name: Reset Password
+        meta:
+          id: req_auth_reset_password
+          created: 1700001200000
+          modified: 1700001200000
+          isPrivate: false
+          description: ""
+          sortKey: -1600000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"email":"john@example.com","token":"{{ reset_token
+            }}","password":"new-password","password_confirmation":"new-password"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/auth/email/verify/{{ user_id }}/{{ hash }}"
+        name: Verify Email
+        meta:
+          id: req_auth_verify_email
+          created: 1700001300000
+          modified: 1700001300000
+          isPrivate: false
+          description: ""
+          sortKey: -1700000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/auth/email/resend"
+        name: Resend Verification
+        meta:
+          id: req_auth_resend_verification
+          created: 1700001400000
+          modified: 1700001400000
+          isPrivate: false
+          description: ""
+          sortKey: -1800000
+        method: POST
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Catalog
+    meta:
+      id: fld_catalog
+      created: 1700000400000
+      modified: 1700000400000
+      sortKey: -2000000
+      description: Books, authors, categories, and book copies
+    children:
+      - url: "{{ base_url }}/books"
+        name: List Books
+        meta:
+          id: req_books_index
+          created: 1700001500000
+          modified: 1700001500000
+          isPrivate: false
+          description: ""
+          sortKey: -1900000
+        method: GET
+        parameters:
+          - name: filter[author_id]
+            value: ""
+            disabled: true
+          - name: filter[category_id]
+            value: ""
+            disabled: true
+          - name: filter[search]
+            value: ""
+            disabled: true
+          - name: sort
+            value: title
+            disabled: false
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('book_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books/{{ book_id }}"
+        name: Show Book
+        meta:
+          id: req_books_show
+          created: 1700001600000
+          modified: 1700001600000
+          isPrivate: false
+          description: ""
+          sortKey: -2000000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books"
+        name: Create Book
+        meta:
+          id: req_books_store
+          created: 1700001700000
+          modified: 1700001700000
+          isPrivate: false
+          description: ""
+          sortKey: -2100000
+        method: POST
+        body:
+          mimeType: application/json
+          text: "{\"title\":\"The Great
+            Gatsby\",\"isbn\":\"978-0-7432-7356-5\",\"description\":\"A novel
+            set in the Jazz Age on Long
+            Island...\",\"publication_year\":1925,\"publisher\":\"Charles
+            Scribner's Sons\",\"book_value\":29.99,\"author_id\":\"{{ author_id
+            }}\",\"category_id\":\"{{ category_id }}\"}"
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books/{{ book_id }}"
+        name: Update Book
+        meta:
+          id: req_books_update
+          created: 1700001800000
+          modified: 1700001800000
+          isPrivate: false
+          description: ""
+          sortKey: -2200000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: "{\"title\":\"The Great Gatsby
+            (Updated)\",\"isbn\":\"978-0-7432-7356-5\",\"description\":\"An
+            updated
+            description...\",\"publication_year\":1925,\"publisher\":\"Charles
+            Scribner's Sons\",\"book_value\":34.99,\"author_id\":\"{{ author_id
+            }}\",\"category_id\":\"{{ category_id }}\"}"
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books/{{ book_id }}"
+        name: Delete Book
+        meta:
+          id: req_books_destroy
+          created: 1700001900000
+          modified: 1700001900000
+          isPrivate: false
+          description: ""
+          sortKey: -2300000
+        method: DELETE
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/authors"
+        name: List Authors
+        meta:
+          id: req_authors_index
+          created: 1700002000000
+          modified: 1700002000000
+          isPrivate: false
+          description: ""
+          sortKey: -2400000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('author_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/authors"
+        name: Create Author
+        meta:
+          id: req_authors_store
+          created: 1700002100000
+          modified: 1700002100000
+          isPrivate: false
+          description: ""
+          sortKey: -2500000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"name":"F. Scott Fitzgerald","biography":"American novelist and short
+            story writer...","birth_date":"1896-09-24"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/authors/{{ author_id }}"
+        name: Update Author
+        meta:
+          id: req_authors_update
+          created: 1700002200000
+          modified: 1700002200000
+          isPrivate: false
+          description: ""
+          sortKey: -2600000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: '{"name":"F. Scott Fitzgerald (Updated)","biography":"Updated
+            biography...","birth_date":"1896-09-24"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/categories"
+        name: List Categories
+        meta:
+          id: req_categories_index
+          created: 1700002300000
+          modified: 1700002300000
+          isPrivate: false
+          description: ""
+          sortKey: -2700000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('category_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/categories"
+        name: Create Category
+        meta:
+          id: req_categories_store
+          created: 1700002400000
+          modified: 1700002400000
+          isPrivate: false
+          description: ""
+          sortKey: -2800000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"name":"Classic Literature","description":"Timeless literary works
+            spanning generations."}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books/{{ book_id }}/copies"
+        name: List Copies
+        meta:
+          id: req_copies_list
+          created: 1700002400000
+          modified: 1700002400000
+          isPrivate: false
+          description: List all physical copies for a book. Public endpoint, no auth
+            required.
+          sortKey: -2310000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('book_copy_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books/{{ book_id }}/copies"
+        name: Add Copy
+        meta:
+          id: req_copies_store
+          created: 1700002450000
+          modified: 1700002450000
+          isPrivate: false
+          description: Add a new physical copy to a book. Code is auto-generated from ISBN
+            prefix + sequential suffix.
+          sortKey: -2320000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"acquisition_date":"2026-06-15"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.id) {
+              insomnia.environment.set('book_copy_id', json.data.id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/book-copies/{{ book_copy_id }}/status"
+        name: Update Copy Status
+        meta:
+          id: req_copies_update_status
+          created: 1700002460000
+          modified: 1700002460000
+          isPrivate: false
+          description: "Change the status of a physical copy. Allowed: available,
+            maintenance, lost. Cannot set loaned directly (reserved for loan
+            checkouts)."
+          sortKey: -2330000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: '{"status":"maintenance"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/book-copies/{{ book_copy_id }}"
+        name: Delete Copy
+        meta:
+          id: req_copies_destroy
+          created: 1700002470000
+          modified: 1700002470000
+          isPrivate: false
+          description: Delete a physical copy. Returns 409 COPY_HAS_ACTIVE_LOAN if the
+            copy currently has an active loan.
+          sortKey: -2340000
+        method: DELETE
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Users
+    meta:
+      id: fld_users
+      created: 1700000500000
+      modified: 1781095347524
+      sortKey: -1000000
+      description: User management (admin only)
+    children:
+      - url: "{{ base_url }}/users"
+        name: List Users
+        meta:
+          id: req_users_index
+          created: 1700002500000
+          modified: 1700002500000
+          isPrivate: false
+          description: ""
+          sortKey: -2900000
+        method: GET
+        parameters:
+          - name: filter[name]
+            value: ""
+            disabled: true
+          - name: filter[email]
+            value: ""
+            disabled: true
+          - name: sort
+            value: -created_at
+            disabled: false
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('user_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users"
+        name: Create User
+        meta:
+          id: req_users_store
+          created: 1700002600000
+          modified: 1700002600000
+          isPrivate: false
+          description: ""
+          sortKey: -3000000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"name":"Jane
+            Smith","email":"jane@example.com","password":"password","role":"librarian"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users/{{ user_id }}"
+        name: Show User
+        meta:
+          id: req_users_show
+          created: 1700002700000
+          modified: 1700002700000
+          isPrivate: false
+          description: ""
+          sortKey: -3100000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users/{{ user_id }}"
+        name: Update User
+        meta:
+          id: req_users_update
+          created: 1700002800000
+          modified: 1700002800000
+          isPrivate: false
+          description: ""
+          sortKey: -3200000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: '{"name":"Jane Smith Updated","email":"jane.updated@example.com"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users/{{ user_id }}"
+        name: Delete User
+        meta:
+          id: req_users_destroy
+          created: 1700002900000
+          modified: 1700002900000
+          isPrivate: false
+          description: ""
+          sortKey: -3300000
+        method: DELETE
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users/{{ user_id }}/suspend"
+        name: Suspend User
+        meta:
+          id: req_users_suspend
+          created: 1700003000000
+          modified: 1700003000000
+          isPrivate: false
+          description: ""
+          sortKey: -3400000
+        method: POST
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users/{{ user_id }}/unsuspend"
+        name: Unsuspend User
+        meta:
+          id: req_users_unsuspend
+          created: 1700003100000
+          modified: 1700003100000
+          isPrivate: false
+          description: ""
+          sortKey: -3500000
+        method: POST
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users/{{ user_id }}/role"
+        name: Assign Role
+        meta:
+          id: req_users_assign_role
+          created: 1700003200000
+          modified: 1700003200000
+          isPrivate: false
+          description: ""
+          sortKey: -3600000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: '{"role":"admin"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_e2ecb202ca2aaa02356bbe52ce0b7e1d549f3036
+    created: 1781091015255
+    modified: 1781095347508
+environments:
+  name: Base Environment
+  meta:
+    id: env_base
+    created: 1700000100000
+    modified: 1781095347518
+    isPrivate: false
+  data:
+    base_url: "{{ scheme }}://{{ host }}{{ base_path }}"
+  subEnvironments:
+    - name: Dev
+      meta:
+        id: env_local
+        created: 1700000200000
+        modified: 1781095347513
+        isPrivate: false
+        sortKey: 0
+      data:
+        scheme: http
+        host: library-api.test
+        base_path: /api/v1
+        token: ""
+        user_id: ""
+        hash: ""
+        book_id: ""
+        book_copy_id: ""
+        author_id: ""
+        category_id: ""
+        reset_token: ""
+      color: "#87e8de"
