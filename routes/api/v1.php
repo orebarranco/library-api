@@ -57,6 +57,11 @@ Route::prefix('reservations')->name('reservations.')->middleware(['auth:sanctum'
     Route::get('/', [ReservationController::class, 'index'])->name('index');
     Route::post('/', [ReservationController::class, 'store'])->name('store');
     Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
+    Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->name('destroy');
+    Route::middleware(['role:librarian,admin'])->group(function (): void {
+        Route::post('/{reservation}/approve', [ReservationController::class, 'approve'])->name('approve');
+        Route::post('/{reservation}/reject', [ReservationController::class, 'reject'])->name('reject');
+    });
 });
 
 Route::prefix('categories')->name('categories.')->group(function (): void {
