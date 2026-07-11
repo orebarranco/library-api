@@ -8,7 +8,7 @@ use App\Models\Reservation;
 it('renders JSON:API format with the expected attributes', function (): void {
     $reservation = Reservation::factory()->approved()->create(['reason' => null]);
 
-    $response = (new ReservationResource($reservation))->response();
+    $response = new ReservationResource($reservation)->response();
     $data = $response->getData(true)['data'];
 
     expect($data['type'])->toBe('reservations')
