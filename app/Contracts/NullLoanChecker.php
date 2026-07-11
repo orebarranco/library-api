@@ -6,6 +6,7 @@ namespace App\Contracts;
 
 use App\Models\Book;
 use App\Models\BookCopy;
+use App\Models\User;
 
 final class NullLoanChecker implements LoanChecker
 {
@@ -15,6 +16,11 @@ final class NullLoanChecker implements LoanChecker
     }
 
     public function hasActiveLoanForCopy(BookCopy $copy): bool
+    {
+        return false;
+    }
+
+    public function hasOverdueLoans(User $user): bool
     {
         return false;
     }
