@@ -187,7 +187,8 @@ collection:
         method: POST
         body:
           mimeType: application/json
-          text: '{"email":"john@example.com","token":"{{ reset_token }}","password":"new-password","password_confirmation":"new-password"}'
+          text: '{"email":"john@example.com","token":"{{ reset_token
+            }}","password":"new-password","password_confirmation":"new-password"}'
         headers:
           - name: Accept
             value: application/vnd.api+json
@@ -328,7 +329,12 @@ collection:
         method: POST
         body:
           mimeType: application/json
-          text: "{\"title\":\"The Great Gatsby\",\"isbn\":\"978-0-7432-7356-5\",\"description\":\"A novel set in the Jazz Age on Long Island...\",\"publication_year\":1925,\"publisher\":\"Charles Scribner's Sons\",\"book_value\":29.99,\"author_id\":\"{{ author_id }}\",\"category_id\":\"{{ category_id }}\"}"
+          text: "{\"title\":\"The Great
+            Gatsby\",\"isbn\":\"978-0-7432-7356-5\",\"description\":\"A novel
+            set in the Jazz Age on Long
+            Island...\",\"publication_year\":1925,\"publisher\":\"Charles
+            Scribner's Sons\",\"book_value\":29.99,\"author_id\":\"{{ author_id
+            }}\",\"category_id\":\"{{ category_id }}\"}"
         headers:
           - name: Accept
             value: application/vnd.api+json
@@ -358,7 +364,12 @@ collection:
         method: PUT
         body:
           mimeType: application/json
-          text: "{\"title\":\"The Great Gatsby (Updated)\",\"isbn\":\"978-0-7432-7356-5\",\"description\":\"An updated description...\",\"publication_year\":1925,\"publisher\":\"Charles Scribner's Sons\",\"book_value\":34.99,\"author_id\":\"{{ author_id }}\",\"category_id\":\"{{ category_id }}\"}"
+          text: "{\"title\":\"The Great Gatsby
+            (Updated)\",\"isbn\":\"978-0-7432-7356-5\",\"description\":\"An
+            updated
+            description...\",\"publication_year\":1925,\"publisher\":\"Charles
+            Scribner's Sons\",\"book_value\":34.99,\"author_id\":\"{{ author_id
+            }}\",\"category_id\":\"{{ category_id }}\"}"
         headers:
           - name: Accept
             value: application/vnd.api+json
@@ -385,124 +396,6 @@ collection:
           isPrivate: false
           description: ""
           sortKey: -2300000
-        method: DELETE
-        headers:
-          - name: Accept
-            value: application/vnd.api+json
-        authentication:
-          type: bearer
-          token: "{{ token }}"
-          prefix: Bearer
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ base_url }}/books/{{ book_id }}/copies"
-        name: List Copies
-        meta:
-          id: req_copies_list
-          created: 1700002400000
-          modified: 1700002400000
-          isPrivate: false
-          description: "List all physical copies for a book. Public endpoint, no auth required."
-          sortKey: -2310000
-        method: GET
-        headers:
-          - name: Accept
-            value: application/vnd.api+json
-        scripts:
-          afterResponse: |-
-            const json = insomnia.response.json();
-            if (json?.data?.[0]?.id) {
-              insomnia.environment.set('book_copy_id', json.data[0].id);
-            }
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ base_url }}/books/{{ book_id }}/copies"
-        name: Add Copy
-        meta:
-          id: req_copies_store
-          created: 1700002450000
-          modified: 1700002450000
-          isPrivate: false
-          description: "Add a new physical copy to a book. Code is auto-generated from ISBN prefix + sequential suffix."
-          sortKey: -2320000
-        method: POST
-        body:
-          mimeType: application/json
-          text: '{"acquisition_date":"2026-06-15"}'
-        headers:
-          - name: Accept
-            value: application/vnd.api+json
-          - name: Content-Type
-            value: application/json
-        authentication:
-          type: bearer
-          token: "{{ token }}"
-          prefix: Bearer
-        scripts:
-          afterResponse: |-
-            const json = insomnia.response.json();
-            if (json?.data?.id) {
-              insomnia.environment.set('book_copy_id', json.data.id);
-            }
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ base_url }}/book-copies/{{ book_copy_id }}/status"
-        name: Update Copy Status
-        meta:
-          id: req_copies_update_status
-          created: 1700002460000
-          modified: 1700002460000
-          isPrivate: false
-          description: "Change the status of a physical copy. Allowed: available, maintenance, lost. Cannot set loaned directly (reserved for loan checkouts)."
-          sortKey: -2330000
-        method: PUT
-        body:
-          mimeType: application/json
-          text: '{"status":"maintenance"}'
-        headers:
-          - name: Accept
-            value: application/vnd.api+json
-          - name: Content-Type
-            value: application/json
-        authentication:
-          type: bearer
-          token: "{{ token }}"
-          prefix: Bearer
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ base_url }}/book-copies/{{ book_copy_id }}"
-        name: Delete Copy
-        meta:
-          id: req_copies_destroy
-          created: 1700002470000
-          modified: 1700002470000
-          isPrivate: false
-          description: "Delete a physical copy. Returns 409 COPY_HAS_ACTIVE_LOAN if the copy currently has an active loan."
-          sortKey: -2340000
         method: DELETE
         headers:
           - name: Accept
@@ -558,7 +451,8 @@ collection:
         method: POST
         body:
           mimeType: application/json
-          text: '{"name":"F. Scott Fitzgerald","biography":"American novelist and short story writer...","birth_date":"1896-09-24"}'
+          text: '{"name":"F. Scott Fitzgerald","biography":"American novelist and short
+            story writer...","birth_date":"1896-09-24"}'
         headers:
           - name: Accept
             value: application/vnd.api+json
@@ -588,7 +482,8 @@ collection:
         method: PUT
         body:
           mimeType: application/json
-          text: '{"name":"F. Scott Fitzgerald (Updated)","biography":"Updated biography...","birth_date":"1896-09-24"}'
+          text: '{"name":"F. Scott Fitzgerald (Updated)","biography":"Updated
+            biography...","birth_date":"1896-09-24"}'
         headers:
           - name: Accept
             value: application/vnd.api+json
@@ -645,12 +540,136 @@ collection:
         method: POST
         body:
           mimeType: application/json
-          text: '{"name":"Classic Literature","description":"Timeless literary works spanning generations."}'
+          text: '{"name":"Classic Literature","description":"Timeless literary works
+            spanning generations."}'
         headers:
           - name: Accept
             value: application/vnd.api+json
           - name: Content-Type
             value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books/{{ book_id }}/copies"
+        name: List Copies
+        meta:
+          id: req_copies_list
+          created: 1700002400000
+          modified: 1700002400000
+          isPrivate: false
+          description: List all physical copies for a book. Public endpoint, no auth
+            required.
+          sortKey: -2310000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('book_copy_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/books/{{ book_id }}/copies"
+        name: Add Copy
+        meta:
+          id: req_copies_store
+          created: 1700002450000
+          modified: 1700002450000
+          isPrivate: false
+          description: Add a new physical copy to a book. Code is auto-generated from ISBN
+            prefix + sequential suffix.
+          sortKey: -2320000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"acquisition_date":"2026-06-15"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.id) {
+              insomnia.environment.set('book_copy_id', json.data.id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/book-copies/{{ book_copy_id }}/status"
+        name: Update Copy Status
+        meta:
+          id: req_copies_update_status
+          created: 1700002460000
+          modified: 1700002460000
+          isPrivate: false
+          description: "Change the status of a physical copy. Allowed: available,
+            maintenance, lost. Cannot set loaned directly (reserved for loan
+            checkouts)."
+          sortKey: -2330000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: '{"status":"maintenance"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/book-copies/{{ book_copy_id }}"
+        name: Delete Copy
+        meta:
+          id: req_copies_destroy
+          created: 1700002470000
+          modified: 1700002470000
+          isPrivate: false
+          description: Delete a physical copy. Returns 409 COPY_HAS_ACTIVE_LOAN if the
+            copy currently has an active loan.
+          sortKey: -2340000
+        method: DELETE
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
         authentication:
           type: bearer
           token: "{{ token }}"
@@ -724,7 +743,8 @@ collection:
         method: POST
         body:
           mimeType: application/json
-          text: '{"name":"Jane Smith","email":"jane@example.com","password":"password","role":"librarian"}'
+          text: '{"name":"Jane
+            Smith","email":"jane@example.com","password":"password","role":"librarian"}'
         headers:
           - name: Accept
             value: application/vnd.api+json
