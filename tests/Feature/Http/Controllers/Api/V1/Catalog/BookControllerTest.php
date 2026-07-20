@@ -70,18 +70,21 @@ it('search by publisher returns matching books', function (): void {
     $category = Category::factory()->create();
     Book::factory()->create([
         'title' => 'Clean Code',
+        'publisher' => 'Prentice Hall',
         'author_id' => $author->id,
         'category_id' => $category->id,
     ]);
     Book::factory()->create([
         'title' => 'Other Book',
+        'publisher' => 'O\'Reilly Media',
         'author_id' => $author->id,
         'category_id' => $category->id,
     ]);
 
-    // Publisher search is a no-op if publisher field doesn't exist in factory — just assert no error
     $this->getJson($this->endpoint.'?filter[search]=Prentice')
-        ->assertSuccessful();
+        ->assertSuccessful()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.attributes.title', 'Clean Code');
 });
 
 it('filter by category_id returns correct books', function (): void {
@@ -172,14 +175,56 @@ it('librarian can create a book with valid data', function (): void {
     $this->postJson($this->endpoint, [
         'title' => 'Clean Code',
         'isbn' => '9780132350884',
+        'description' => 'A handbook of agile software craftsmanship.',
         'publication_year' => 2008,
+        'publisher' => 'Prentice Hall',
         'book_value' => 29.99,
         'author_id' => $author->id,
         'category_id' => $category->id,
     ])
         ->assertCreated()
         ->assertJsonPath('data.type', 'books')
-        ->assertJsonPath('data.attributes.title', 'Clean Code');
+        ->assertJsonPath('data.attributes.title', 'Clean Code')
+        ->assertJsonPath('data.attributes.publisher', 'Prentice Hall');
+});
+
+it('librarian can create a book without a publisher', function (): void {
+    $librarian = User::factory()->create(['role' => UserRole::Librarian]);
+    Sanctum::actingAs($librarian);
+
+    $author = Author::factory()->create();
+    $category = Category::factory()->create();
+
+    $this->postJson($this->endpoint, [
+        'title' => 'Self-Published Book',
+        'isbn' => '9780132350886',
+        'description' => 'A book with no publisher on record.',
+        'publication_year' => 2020,
+        'book_value' => 15.00,
+        'author_id' => $author->id,
+        'category_id' => $category->id,
+    ])
+        ->assertCreated()
+        ->assertJsonPath('data.attributes.publisher', null);
+});
+
+it('returns 422 if description is missing', function (): void {
+    $librarian = User::factory()->create(['role' => UserRole::Librarian]);
+    Sanctum::actingAs($librarian);
+
+    $author = Author::factory()->create();
+    $category = Category::factory()->create();
+
+    $this->postJson($this->endpoint, [
+        'title' => 'Clean Code',
+        'isbn' => '9780132350884',
+        'publication_year' => 2008,
+        'book_value' => 29.99,
+        'author_id' => $author->id,
+        'category_id' => $category->id,
+    ])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.0.code', 'VALIDATION_ERROR');
 });
 
 it('admin can create a book', function (): void {
@@ -192,6 +237,7 @@ it('admin can create a book', function (): void {
     $this->postJson($this->endpoint, [
         'title' => 'The Pragmatic Programmer',
         'isbn' => '9780135957059',
+        'description' => 'A classic guide to pragmatic software development.',
         'publication_year' => 2019,
         'book_value' => 35.00,
         'author_id' => $author->id,
@@ -211,6 +257,7 @@ it('returns 201 with JSON:API book resource on success', function (): void {
     $response = $this->postJson($this->endpoint, [
         'title' => 'Design Patterns',
         'isbn' => '9780201633610',
+        'description' => 'Elements of reusable object-oriented software.',
         'publication_year' => 1994,
         'book_value' => 45.00,
         'author_id' => $author->id,
@@ -219,7 +266,7 @@ it('returns 201 with JSON:API book resource on success', function (): void {
 
     $response->assertCreated()
         ->assertJsonStructure([
-            'data' => ['type', 'id', 'attributes' => ['title', 'isbn']],
+            'data' => ['type', 'id', 'attributes' => ['title', 'isbn', 'description', 'publisher']],
             'meta',
         ]);
 
@@ -237,6 +284,7 @@ it('returns 422 DUPLICATE_ISBN if isbn already exists', function (): void {
     $this->postJson($this->endpoint, [
         'title' => 'Another Book',
         'isbn' => '9780132350884',
+        'description' => 'Some description.',
         'publication_year' => 2008,
         'book_value' => 29.99,
         'author_id' => $author->id,

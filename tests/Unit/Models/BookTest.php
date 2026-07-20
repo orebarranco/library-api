@@ -14,8 +14,8 @@ test('to array', function (): void {
     $book = Book::factory()->create()->refresh();
 
     expect(array_keys($book->toArray()))
-        ->toContain('id', 'title', 'isbn', 'publication_year', 'book_value', 'author_id', 'category_id', 'created_at', 'updated_at', 'deleted_at')
-        ->toHaveCount(10);
+        ->toContain('id', 'title', 'isbn', 'description', 'publication_year', 'publisher', 'book_value', 'author_id', 'category_id', 'created_at', 'updated_at', 'deleted_at')
+        ->toHaveCount(12);
 });
 
 test('belongs to author', function (): void {
@@ -56,6 +56,7 @@ test('factory creates valid book with author and category', function (): void {
 
     expect($book->title)->toBeString()->not->toBeEmpty();
     expect($book->isbn)->toBeString()->not->toBeEmpty();
+    expect($book->description)->toBeString()->not->toBeEmpty();
     expect($book->publication_year)->not->toBeNull();
     expect($book->book_value)->not->toBeNull();
     expect($book->author_id)->toBeString()->not->toBeEmpty();

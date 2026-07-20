@@ -18,7 +18,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $id
  * @property string $title
  * @property string $isbn
+ * @property string $description
  * @property int $publication_year
+ * @property string|null $publisher
  * @property string $book_value
  * @property string $author_id
  * @property string $category_id
@@ -44,7 +46,9 @@ final class Book extends Model
     protected $fillable = [
         'title',
         'isbn',
+        'description',
         'publication_year',
+        'publisher',
         'book_value',
         'author_id',
         'category_id',

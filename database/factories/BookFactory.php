@@ -22,7 +22,9 @@ final class BookFactory extends Factory
         return [
             'title' => fake()->sentence(3),
             'isbn' => fake()->unique()->isbn13(),
+            'description' => fake()->paragraph(),
             'publication_year' => fake()->year(),
+            'publisher' => fake()->optional()->company(),
             'book_value' => fake()->randomFloat(2, 5, 100),
             'author_id' => Author::factory(),
             'category_id' => Category::factory(),
