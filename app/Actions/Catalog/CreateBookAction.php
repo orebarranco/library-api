@@ -19,7 +19,9 @@ final class CreateBookAction
         return Book::query()->create([
             'title' => $data->title,
             'isbn' => $data->isbn,
+            'description' => $data->description,
             'publication_year' => $data->publication_year,
+            'publisher' => $data->publisher,
             'book_value' => $data->book_value,
             'author_id' => $data->author_id,
             'category_id' => $data->category_id,

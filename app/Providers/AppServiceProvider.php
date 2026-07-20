@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\FineChecker;
 use App\Contracts\LoanChecker;
+use App\Contracts\NullFineChecker;
 use App\Contracts\NullLoanChecker;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -26,6 +28,7 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(LoanChecker::class, NullLoanChecker::class);
+        $this->app->bind(FineChecker::class, NullFineChecker::class);
     }
 
     /**

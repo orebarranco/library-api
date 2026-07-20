@@ -18,7 +18,9 @@ final class BookResource extends JsonApiResource
     public array $attributes = [
         'title',
         'isbn',
+        'description',
         'publication_year',
+        'publisher',
         'book_value',
     ];
 

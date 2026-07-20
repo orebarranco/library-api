@@ -21,7 +21,7 @@ it('updates book with provided fields', function (): void {
         'isbn' => '9780132350884',
     ]);
 
-    $dto = new UpdateBookDTO(title: 'Updated Title', isbn: null, publication_year: null, book_value: null, author_id: null, category_id: null);
+    $dto = new UpdateBookDTO(title: 'Updated Title', isbn: null, description: null, publication_year: null, publisher: null, book_value: null, author_id: null, category_id: null);
 
     $result = $this->action->execute($book, $dto);
 
@@ -29,11 +29,21 @@ it('updates book with provided fields', function (): void {
         ->and($result->isbn)->toBe('9780132350884');
 });
 
+it('updates publisher when provided', function (): void {
+    $book = Book::factory()->create(['publisher' => 'Old Publisher']);
+
+    $dto = new UpdateBookDTO(title: null, isbn: null, description: null, publication_year: null, publisher: 'New Publisher', book_value: null, author_id: null, category_id: null);
+
+    $result = $this->action->execute($book, $dto);
+
+    expect($result->publisher)->toBe('New Publisher');
+});
+
 it('throws DuplicateIsbnException when new isbn conflicts with another book', function (): void {
     Book::factory()->create(['isbn' => '9780201633610']);
     $book = Book::factory()->create(['isbn' => '9780132350884']);
 
-    $dto = new UpdateBookDTO(title: null, isbn: '9780201633610', publication_year: null, book_value: null, author_id: null, category_id: null);
+    $dto = new UpdateBookDTO(title: null, isbn: '9780201633610', description: null, publication_year: null, publisher: null, book_value: null, author_id: null, category_id: null);
 
     expect(fn () => $this->action->execute($book, $dto))
         ->toThrow(DuplicateIsbnException::class);
@@ -42,7 +52,7 @@ it('throws DuplicateIsbnException when new isbn conflicts with another book', fu
 it('does not throw when isbn is unchanged', function (): void {
     $book = Book::factory()->create(['isbn' => '9780132350884']);
 
-    $dto = new UpdateBookDTO(title: 'New Title', isbn: '9780132350884', publication_year: null, book_value: null, author_id: null, category_id: null);
+    $dto = new UpdateBookDTO(title: 'New Title', isbn: '9780132350884', description: null, publication_year: null, publisher: null, book_value: null, author_id: null, category_id: null);
 
     $result = $this->action->execute($book, $dto);
 

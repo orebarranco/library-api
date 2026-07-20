@@ -14,8 +14,10 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->string('title');
             $table->string('isbn', 17)->unique();
+            $table->text('description');
             $table->year('publication_year');
-            $table->decimal('book_value', 10, 2)->default(0);
+            $table->string('publisher')->nullable();
+            $table->decimal('book_value', 8, 2)->default(0);
             $table->foreignUlid('author_id')
                 ->constrained()
                 ->restrictOnDelete();

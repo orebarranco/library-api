@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\Catalog\AuthorController;
 use App\Http\Controllers\Api\V1\Catalog\BookController;
 use App\Http\Controllers\Api\V1\Catalog\BookCopyController;
 use App\Http\Controllers\Api\V1\Catalog\CategoryController;
+use App\Http\Controllers\Api\V1\Reservation\ReservationController;
 use App\Http\Controllers\Api\V1\User\AssignRoleController;
 use App\Http\Controllers\Api\V1\User\SuspendUserController;
 use App\Http\Controllers\Api\V1\User\UnsuspendUserController;
@@ -50,6 +51,17 @@ Route::prefix('books')->name('books.')->group(function (): void {
 Route::prefix('book-copies')->name('book-copies.')->middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
     Route::put('/{bookCopy}/status', [BookCopyController::class, 'updateStatus'])->name('update-status');
     Route::delete('/{bookCopy}', [BookCopyController::class, 'destroy'])->name('destroy');
+});
+
+Route::prefix('reservations')->name('reservations.')->middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
+    Route::get('/', [ReservationController::class, 'index'])->name('index');
+    Route::post('/', [ReservationController::class, 'store'])->name('store');
+    Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
+    Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->name('destroy');
+    Route::middleware(['role:librarian,admin'])->group(function (): void {
+        Route::post('/{reservation}/approve', [ReservationController::class, 'approve'])->name('approve');
+        Route::post('/{reservation}/reject', [ReservationController::class, 'reject'])->name('reject');
+    });
 });
 
 Route::prefix('categories')->name('categories.')->group(function (): void {

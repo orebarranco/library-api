@@ -11,7 +11,7 @@ collection:
     meta:
       id: fld_auth
       created: 1700000300000
-      modified: 1781095340968
+      modified: 1784528269915
       sortKey: -3000000
       description: Authentication and user management
     children:
@@ -252,7 +252,7 @@ collection:
     meta:
       id: fld_catalog
       created: 1700000400000
-      modified: 1700000400000
+      modified: 1784528440600
       sortKey: -2000000
       description: Books, authors, categories, and book copies
     children:
@@ -322,7 +322,7 @@ collection:
         meta:
           id: req_books_store
           created: 1700001700000
-          modified: 1700001700000
+          modified: 1784528364409
           isPrivate: false
           description: ""
           sortKey: -2100000
@@ -330,10 +330,10 @@ collection:
         body:
           mimeType: application/json
           text: "{\"title\":\"The Great
-            Gatsby\",\"isbn\":\"978-0-7432-7356-5\",\"description\":\"A novel
-            set in the Jazz Age on Long
-            Island...\",\"publication_year\":1925,\"publisher\":\"Charles
-            Scribner's Sons\",\"book_value\":29.99,\"author_id\":\"{{ author_id
+            Gatsby\",\"isbn\":\"978-0-7432-7356-6\",\"description\":\"A novel
+            set in the Jazz Age on Long Island
+            ...\",\"publication_year\":1925,\"publisher\":\"Charles Scribner's
+            Sons\",\"book_value\":29.99,\"author_id\":\"{{ author_id
             }}\",\"category_id\":\"{{ category_id }}\"}"
         headers:
           - name: Accept
@@ -686,7 +686,7 @@ collection:
     meta:
       id: fld_users
       created: 1700000500000
-      modified: 1781095347524
+      modified: 1784528296985
       sortKey: -1000000
       description: User management (admin only)
     children:
@@ -922,18 +922,212 @@ collection:
             send: true
             store: true
           rebuildPath: true
+  - name: Reservations
+    meta:
+      id: fld_reservations
+      created: 1700000600000
+      modified: 1784530103139
+      sortKey: -1500000
+      description: Book reservations (request, approve, reject, cancel)
+    children:
+      - url: "{{ base_url }}/reservations"
+        name: List Reservations
+        meta:
+          id: req_reservations_index
+          created: 1700003300000
+          modified: 1784530101669
+          isPrivate: false
+          description: Librarians/admins see all reservations; regular users only see
+            their own.
+          sortKey: -3700000
+        method: GET
+        parameters:
+          - name: include
+            value: book,user
+            description: ""
+            disabled: false
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('reservation_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reservations"
+        name: Create Reservation
+        meta:
+          id: req_reservations_store
+          created: 1700003400000
+          modified: 1700003400000
+          isPrivate: false
+          description: Reserve a book. Fails if the user already has an active reservation
+            limit reached for the book.
+          sortKey: -3800000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"book_id":"{{ book_id }}"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.id) {
+              insomnia.environment.set('reservation_id', json.data.id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reservations/{{ reservation_id }}"
+        name: Show Reservation
+        meta:
+          id: req_reservations_show
+          created: 1700003500000
+          modified: 1784530019049
+          isPrivate: false
+          description: ""
+          sortKey: -3900000
+        method: GET
+        parameters:
+          - name: include
+            value: book
+            description: ""
+            disabled: false
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reservations/{{ reservation_id }}/approve"
+        name: Approve Reservation
+        meta:
+          id: req_reservations_approve
+          created: 1700003600000
+          modified: 1700003600000
+          isPrivate: false
+          description: Librarian/admin only. Moves a pending reservation to approved and
+            sets the expiration window.
+          sortKey: -4000000
+        method: POST
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reservations/{{ reservation_id }}/reject"
+        name: Reject Reservation
+        meta:
+          id: req_reservations_reject
+          created: 1700003700000
+          modified: 1700003700000
+          isPrivate: false
+          description: Librarian/admin only. Requires a reason.
+          sortKey: -4100000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"reason":"Book copy is no longer available."}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reservations/{{ reservation_id }}"
+        name: Cancel Reservation
+        meta:
+          id: req_reservations_destroy
+          created: 1700003800000
+          modified: 1700003800000
+          isPrivate: false
+          description: Cancels a reservation. Only cancellable while pending/approved and
+            not yet fulfilled.
+          sortKey: -4200000
+        method: DELETE
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
 cookieJar:
   name: Default Jar
   meta:
     id: jar_e2ecb202ca2aaa02356bbe52ce0b7e1d549f3036
     created: 1781091015255
-    modified: 1781095347508
+    modified: 1784530103136
 environments:
   name: Base Environment
   meta:
     id: env_base
     created: 1700000100000
-    modified: 1781095347518
+    modified: 1784530103138
     isPrivate: false
   data:
     base_url: "{{ scheme }}://{{ host }}{{ base_path }}"
@@ -942,7 +1136,7 @@ environments:
       meta:
         id: env_local
         created: 1700000200000
-        modified: 1781095347513
+        modified: 1784530103137
         isPrivate: false
         sortKey: 0
       data:
@@ -957,4 +1151,5 @@ environments:
         author_id: ""
         category_id: ""
         reset_token: ""
+        reservation_id: ""
       color: "#87e8de"

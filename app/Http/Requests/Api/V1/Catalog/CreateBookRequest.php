@@ -22,7 +22,9 @@ final class CreateBookRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'isbn' => ['required', 'string', 'max:17', 'unique:books,isbn'],
+            'description' => ['required', 'string'],
             'publication_year' => ['required', 'integer', 'min:1000', 'max:'.date('Y')],
+            'publisher' => ['nullable', 'string', 'max:255'],
             'book_value' => ['required', 'numeric', 'min:0'],
             'author_id' => ['required', 'string', 'exists:authors,id'],
             'category_id' => ['required', 'string', 'exists:categories,id'],
@@ -34,7 +36,9 @@ final class CreateBookRequest extends FormRequest
         return new CreateBookDTO(
             title: $this->string('title')->toString(),
             isbn: $this->string('isbn')->toString(),
+            description: $this->string('description')->toString(),
             publication_year: $this->integer('publication_year'),
+            publisher: $this->input('publisher') !== null ? $this->string('publisher')->toString() : null,
             book_value: $this->string('book_value')->toString(),
             author_id: $this->string('author_id')->toString(),
             category_id: $this->string('category_id')->toString(),
