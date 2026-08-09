@@ -76,7 +76,7 @@ it('search by publisher returns matching books', function (): void {
     ]);
     Book::factory()->create([
         'title' => 'Other Book',
-        'publisher' => 'O\'Reilly Media',
+        'publisher' => "O'Reilly Media",
         'author_id' => $author->id,
         'category_id' => $category->id,
     ]);

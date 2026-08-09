@@ -23,9 +23,14 @@ final class BookCopyResource extends JsonApiResource
     ];
 
     /**
-     * @var list<string>
+     * Resource classes are declared explicitly because auto-discovery does not
+     * resolve this application's versioned resource namespaces.
+     *
+     * @var array<string, class-string>
      */
-    public array $relationships = [];
+    public array $relationships = [
+        'book' => BookResource::class,
+    ];
 
     public function toType(Request $request): string
     {
