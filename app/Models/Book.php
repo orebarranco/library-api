@@ -18,7 +18,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $id
  * @property string $title
  * @property string $isbn
+ * @property string $description
  * @property int $publication_year
+ * @property string|null $publisher
  * @property string $book_value
  * @property string $author_id
  * @property string $category_id
@@ -28,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Author $author
  * @property-read Category $category
  * @property-read Collection<int, BookCopy> $copies
+ * @property-read Collection<int, Reservation> $reservations
  */
 final class Book extends Model
 {
@@ -43,7 +46,9 @@ final class Book extends Model
     protected $fillable = [
         'title',
         'isbn',
+        'description',
         'publication_year',
+        'publisher',
         'book_value',
         'author_id',
         'category_id',
@@ -79,5 +84,11 @@ final class Book extends Model
     public function copies(): HasMany
     {
         return $this->hasMany(BookCopy::class);
+    }
+
+    /** @return HasMany<Reservation, $this> */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 }

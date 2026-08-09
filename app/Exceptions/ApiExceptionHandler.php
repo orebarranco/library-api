@@ -12,6 +12,13 @@ use App\Exceptions\Auth\InvalidPasswordResetTokenException;
 use App\Exceptions\Catalog\BookCopyHasActiveLoanException;
 use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Exceptions\Catalog\DuplicateIsbnException;
+use App\Exceptions\Reservation\DuplicateReservationException;
+use App\Exceptions\Reservation\NoCopiesAvailableException;
+use App\Exceptions\Reservation\OverdueLoansException;
+use App\Exceptions\Reservation\ReservationLimitExceededException;
+use App\Exceptions\Reservation\ReservationNotCancellableException;
+use App\Exceptions\Reservation\ReservationNotPendingException;
+use App\Exceptions\Reservation\UnpaidFinesException;
 use App\Traits\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -37,6 +44,13 @@ final class ApiExceptionHandler
             $e instanceof DuplicateIsbnException => $this->handleDuplicateIsbn($e),
             $e instanceof BookHasActiveLoansException => $this->handleBookHasActiveLoans($e),
             $e instanceof BookCopyHasActiveLoanException => $this->handleBookCopyHasActiveLoan($e),
+            $e instanceof NoCopiesAvailableException => $this->handleNoCopiesAvailable($e),
+            $e instanceof DuplicateReservationException => $this->handleDuplicateReservation($e),
+            $e instanceof ReservationLimitExceededException => $this->handleReservationLimitExceeded($e),
+            $e instanceof UnpaidFinesException => $this->handleUnpaidFines($e),
+            $e instanceof OverdueLoansException => $this->handleOverdueLoans($e),
+            $e instanceof ReservationNotPendingException => $this->handleReservationNotPending($e),
+            $e instanceof ReservationNotCancellableException => $this->handleReservationNotCancellable($e),
             $e instanceof AccountSuspendedException => $this->handleAccountSuspended(),
             $e instanceof InvalidCredentialsException => $this->handleInvalidCredentials($e),
             $e instanceof InvalidPasswordResetTokenException => $this->handleInvalidPasswordResetToken($e),
@@ -81,6 +95,76 @@ final class ApiExceptionHandler
             code: 'COPY_HAS_ACTIVE_LOAN',
             detail: $e->getMessage(),
             status: Response::HTTP_CONFLICT,
+        );
+    }
+
+    private function handleNoCopiesAvailable(NoCopiesAvailableException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'No copies available.',
+            code: 'NO_COPIES_AVAILABLE',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleDuplicateReservation(DuplicateReservationException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Duplicate reservation.',
+            code: 'DUPLICATE_RESERVATION',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleReservationLimitExceeded(ReservationLimitExceededException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Reservation limit exceeded.',
+            code: 'RESERVATION_LIMIT',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleUnpaidFines(UnpaidFinesException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Unpaid fines.',
+            code: 'UNPAID_FINES',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleOverdueLoans(OverdueLoansException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Overdue loans.',
+            code: 'OVERDUE_LOANS',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleReservationNotPending(ReservationNotPendingException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Reservation is not pending.',
+            code: 'RESERVATION_NOT_PENDING',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleReservationNotCancellable(ReservationNotCancellableException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Reservation is not cancellable.',
+            code: 'RESERVATION_NOT_CANCELLABLE',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
         );
     }
 

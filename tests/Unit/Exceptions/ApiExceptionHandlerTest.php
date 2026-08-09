@@ -8,6 +8,13 @@ use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
 use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Exceptions\Catalog\DuplicateIsbnException;
+use App\Exceptions\Reservation\DuplicateReservationException;
+use App\Exceptions\Reservation\NoCopiesAvailableException;
+use App\Exceptions\Reservation\OverdueLoansException;
+use App\Exceptions\Reservation\ReservationLimitExceededException;
+use App\Exceptions\Reservation\ReservationNotCancellableException;
+use App\Exceptions\Reservation\ReservationNotPendingException;
+use App\Exceptions\Reservation\UnpaidFinesException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -65,6 +72,62 @@ it('handles BookHasActiveLoansException as 409', function (): void {
 
     expect($response->status())->toBe(Response::HTTP_CONFLICT)
         ->and($data['errors'][0]['code'])->toBe('BOOK_HAS_ACTIVE_LOANS');
+});
+
+it('handles NoCopiesAvailableException as 422', function (): void {
+    $response = $this->handler->render(new NoCopiesAvailableException('book-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('NO_COPIES_AVAILABLE');
+});
+
+it('handles DuplicateReservationException as 422', function (): void {
+    $response = $this->handler->render(new DuplicateReservationException('book-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('DUPLICATE_RESERVATION');
+});
+
+it('handles ReservationLimitExceededException as 422', function (): void {
+    $response = $this->handler->render(new ReservationLimitExceededException('user-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('RESERVATION_LIMIT');
+});
+
+it('handles UnpaidFinesException as 422', function (): void {
+    $response = $this->handler->render(new UnpaidFinesException('user-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('UNPAID_FINES');
+});
+
+it('handles OverdueLoansException as 422', function (): void {
+    $response = $this->handler->render(new OverdueLoansException('user-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('OVERDUE_LOANS');
+});
+
+it('handles ReservationNotPendingException as 422', function (): void {
+    $response = $this->handler->render(new ReservationNotPendingException('reservation-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('RESERVATION_NOT_PENDING');
+});
+
+it('handles ReservationNotCancellableException as 422', function (): void {
+    $response = $this->handler->render(new ReservationNotCancellableException('reservation-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('RESERVATION_NOT_CANCELLABLE');
 });
 
 it('handles AccountSuspendedException as 403', function (): void {

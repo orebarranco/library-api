@@ -9,8 +9,10 @@ use App\Enums\UserStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -28,6 +30,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
  * @property CarbonInterface|null $deleted_at
+ * @property-read Collection<int, Reservation> $reservations
  */
 final class User extends Authenticatable implements MustVerifyEmail
 {
@@ -73,5 +76,11 @@ final class User extends Authenticatable implements MustVerifyEmail
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    /** @return HasMany<Reservation, $this> */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 }
