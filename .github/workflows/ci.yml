@@ -1,0 +1,78 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Quality gate (PHP 8.4)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3
+          # The suite asserts exactly 100% coverage, so a driver is required.
+          coverage: xdebug
+
+      - name: Resolve Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-php8.4-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-php8.4-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress --quiet
+
+      - name: Prepare environment
+        # Tests run against an in-memory SQLite database (see phpunit.xml), so
+        # no service container is needed — only an application key.
+        run: |
+          cp .env.example .env
+          php artisan key:generate --quiet
+          php artisan config:clear --quiet
+
+      # Each gate is one of the scripts behind `composer test`, so CI cannot
+      # drift from what runs locally. The scripts carry the tools' own quiet
+      # flags (--compact, --no-progress, --no-progress-bar), which keep the
+      # per-file tables out of the log while still printing the totals and
+      # the full detail of anything that fails.
+      #
+      # Ordered cheapest first, so a style or typing failure never pays for
+      # the test run behind it. Measured on this suite: static analysis 8s,
+      # style 15s, type coverage 19s, tests 15s. A failing linter now stops
+      # the job in ~28s instead of ~62s. Splitting these into a second job
+      # gated with `needs:` would cost a second checkout, PHP setup and
+      # install (~13s) on every green run, which is the common case.
+
+      - name: Static analysis
+        run: composer test:types
+
+      - name: Code style and refactors
+        run: composer test:lint
+
+      - name: Type coverage
+        run: composer test:type-coverage
+
+      - name: Tests and code coverage
+        run: composer test:unit
