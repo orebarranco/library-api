@@ -79,16 +79,16 @@
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
         "lint": [
-            "rector",
+            "rector --no-progress-bar",
             "pint --parallel"
         ],
-        "test:type-coverage": "pest --type-coverage --min=100",
+        "test:type-coverage": "pest --type-coverage --min=100 --compact",
         "test:lint": [
             "pint --parallel --test",
-            "rector --dry-run"
+            "rector --dry-run --no-progress-bar"
         ],
-        "test:unit": "XDEBUG_MODE=\"coverage\" pest --parallel --coverage --exactly=100.0",
-        "test:types": "phpstan",
+        "test:unit": "XDEBUG_MODE=\"coverage\" pest --parallel --compact --coverage --exactly=100.0",
+        "test:types": "phpstan --no-progress",
         "test": [
             "@php artisan config:clear --ansi",
             "@test:type-coverage",
