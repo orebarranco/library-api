@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\Catalog\AuthorController;
 use App\Http\Controllers\Api\V1\Catalog\BookController;
 use App\Http\Controllers\Api\V1\Catalog\BookCopyController;
 use App\Http\Controllers\Api\V1\Catalog\CategoryController;
+use App\Http\Controllers\Api\V1\Loan\LoanController;
 use App\Http\Controllers\Api\V1\Reservation\ReservationController;
 use App\Http\Controllers\Api\V1\User\AssignRoleController;
 use App\Http\Controllers\Api\V1\User\SuspendUserController;
@@ -61,6 +62,23 @@ Route::prefix('reservations')->name('reservations.')->middleware(['auth:sanctum'
     Route::middleware(['role:librarian,admin'])->group(function (): void {
         Route::post('/{reservation}/approve', [ReservationController::class, 'approve'])->name('approve');
         Route::post('/{reservation}/reject', [ReservationController::class, 'reject'])->name('reject');
+    });
+});
+
+Route::prefix('loans')->name('loans.')->middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
+    Route::get('/', [LoanController::class, 'index'])->name('index');
+
+    // Registered before the /{loan} routes so the literal segment wins over model binding.
+    Route::middleware(['role:librarian,admin'])->group(function (): void {
+        Route::post('/', [LoanController::class, 'store'])->name('store');
+        Route::get('/overdue', [LoanController::class, 'overdue'])->name('overdue');
+    });
+
+    Route::get('/{loan}', [LoanController::class, 'show'])->name('show');
+    Route::post('/{loan}/renew', [LoanController::class, 'renew'])->name('renew');
+
+    Route::middleware(['role:librarian,admin'])->group(function (): void {
+        Route::post('/{loan}/return', [LoanController::class, 'return'])->name('return');
     });
 });
 

@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Exceptions\Loan;
+
+use RuntimeException;
+
+final class LoanAlreadyReturnedException extends RuntimeException
+{
+    public function __construct(
+        public readonly string $loanId,
+    ) {
+        parent::__construct("Loan '{$loanId}' has already been returned.");
+    }
+}

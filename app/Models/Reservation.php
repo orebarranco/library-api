@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read User $user
  * @property-read Book $book
  * @property-read User|null $approvedBy
+ * @property-read Loan|null $loan
  */
 final class Reservation extends Model
 {
@@ -84,5 +86,11 @@ final class Reservation extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /** @return HasOne<Loan, $this> */
+    public function loan(): HasOne
+    {
+        return $this->hasOne(Loan::class);
     }
 }

@@ -12,6 +12,12 @@ use App\Exceptions\Auth\InvalidPasswordResetTokenException;
 use App\Exceptions\Catalog\BookCopyHasActiveLoanException;
 use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Exceptions\Catalog\DuplicateIsbnException;
+use App\Exceptions\Loan\BookHasReservationsException;
+use App\Exceptions\Loan\LoanAlreadyReturnedException;
+use App\Exceptions\Loan\LoanOverdueException;
+use App\Exceptions\Loan\RenewalLimitReachedException;
+use App\Exceptions\Loan\RenewalTooLateException;
+use App\Exceptions\Loan\ReservationNotApprovedException;
 use App\Exceptions\Reservation\DuplicateReservationException;
 use App\Exceptions\Reservation\NoCopiesAvailableException;
 use App\Exceptions\Reservation\OverdueLoansException;
@@ -51,6 +57,12 @@ final class ApiExceptionHandler
             $e instanceof OverdueLoansException => $this->handleOverdueLoans($e),
             $e instanceof ReservationNotPendingException => $this->handleReservationNotPending($e),
             $e instanceof ReservationNotCancellableException => $this->handleReservationNotCancellable($e),
+            $e instanceof ReservationNotApprovedException => $this->handleReservationNotApproved($e),
+            $e instanceof RenewalLimitReachedException => $this->handleRenewalLimitReached($e),
+            $e instanceof LoanOverdueException => $this->handleLoanOverdue($e),
+            $e instanceof BookHasReservationsException => $this->handleBookHasReservations($e),
+            $e instanceof RenewalTooLateException => $this->handleRenewalTooLate($e),
+            $e instanceof LoanAlreadyReturnedException => $this->handleLoanAlreadyReturned($e),
             $e instanceof AccountSuspendedException => $this->handleAccountSuspended(),
             $e instanceof InvalidCredentialsException => $this->handleInvalidCredentials($e),
             $e instanceof InvalidPasswordResetTokenException => $this->handleInvalidPasswordResetToken($e),
@@ -63,6 +75,7 @@ final class ApiExceptionHandler
             $e instanceof TooManyRequestsHttpException => $this->handleThrottle(),
             $e instanceof InvalidSignatureException => $this->handleInvalidSignature(),
             $e instanceof AccessDeniedHttpException && $e->getPrevious() instanceof InsufficientPermissionsException => $this->handleInsufficientPermissions(),
+            $e instanceof AccessDeniedHttpException && $e->getPrevious() instanceof AuthorizationException => $this->handleAuthorization(),
             $e instanceof HttpException => $this->handleHttp($e),
             default => $this->handleGeneric($e),
         };
@@ -163,6 +176,66 @@ final class ApiExceptionHandler
         return $this->error(
             message: 'Reservation is not cancellable.',
             code: 'RESERVATION_NOT_CANCELLABLE',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleReservationNotApproved(ReservationNotApprovedException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Reservation is not approved.',
+            code: 'RESERVATION_NOT_APPROVED',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleRenewalLimitReached(RenewalLimitReachedException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Renewal limit reached.',
+            code: 'RENEWAL_LIMIT_REACHED',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleLoanOverdue(LoanOverdueException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Loan is overdue.',
+            code: 'LOAN_OVERDUE',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleBookHasReservations(BookHasReservationsException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Book has active reservations.',
+            code: 'BOOK_HAS_RESERVATIONS',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleRenewalTooLate(RenewalTooLateException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Renewal is too late.',
+            code: 'RENEWAL_TOO_LATE',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleLoanAlreadyReturned(LoanAlreadyReturnedException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Loan has already been returned.',
+            code: 'LOAN_ALREADY_RETURNED',
             detail: $e->getMessage(),
             status: Response::HTTP_UNPROCESSABLE_ENTITY,
         );

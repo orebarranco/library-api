@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Loan;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,4 +22,12 @@ test('has many reservations', function (): void {
 
     expect($user->reservations())->toBeInstanceOf(HasMany::class);
     expect($user->reservations)->toHaveCount(2);
+});
+
+test('has many loans', function (): void {
+    $user = User::factory()->create();
+    Loan::factory()->count(2)->create(['user_id' => $user->id]);
+
+    expect($user->loans())->toBeInstanceOf(HasMany::class);
+    expect($user->loans)->toHaveCount(2);
 });
