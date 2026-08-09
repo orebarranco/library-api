@@ -31,6 +31,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property CarbonInterface|null $updated_at
  * @property CarbonInterface|null $deleted_at
  * @property-read Collection<int, Reservation> $reservations
+ * @property-read Collection<int, Loan> $loans
  */
 final class User extends Authenticatable implements MustVerifyEmail
 {
@@ -82,5 +83,11 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    /** @return HasMany<Loan, $this> */
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
     }
 }
