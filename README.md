@@ -2,8 +2,8 @@
 
 > Headless REST API for library management — Laravel 13 · PHP 8.4 · JSON:API
 
-[![Tests](https://github.com/orebarranco/libraryapi/actions/workflows/ci.yml/badge.svg)](https://github.com/orebarranco/libraryapi/actions)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/orebarranco/libraryapi)
+[![Tests](https://github.com/orebarranco/library-api/actions/workflows/ci.yml/badge.svg)](https://github.com/orebarranco/library-api/actions)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/orebarranco/library-api)
 [![PHPStan](https://img.shields.io/badge/PHPStan-max-brightgreen)](https://phpstan.org)
 [![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.4-777BB4)](https://php.net)
@@ -29,8 +29,8 @@ Built on top of [`orebarranco/laravel-api-starter-kit`](https://github.com/oreba
 ## Installation
 
 ```bash
-git clone https://github.com/orebarranco/libraryapi.git
-cd libraryapi
+git clone https://github.com/orebarranco/library-api.git
+cd library-api
 composer install
 cp .env.example .env
 php artisan key:generate
