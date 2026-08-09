@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\EloquentLoanChecker;
 use App\Contracts\FineChecker;
+use App\Contracts\FineGenerator;
 use App\Contracts\LoanChecker;
 use App\Contracts\NullFineChecker;
-use App\Contracts\NullLoanChecker;
+use App\Contracts\NullFineGenerator;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -27,7 +29,11 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(LoanChecker::class, NullLoanChecker::class);
+        // Loans exist from Module 8 onwards, so the null placeholder is no longer needed.
+        $this->app->bind(LoanChecker::class, EloquentLoanChecker::class);
+
+        // Fines are persisted by Module 9; until then generation is a no-op.
+        $this->app->bind(FineGenerator::class, NullFineGenerator::class);
         $this->app->bind(FineChecker::class, NullFineChecker::class);
     }
 
