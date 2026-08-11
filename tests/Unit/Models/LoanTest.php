@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Enums\LoanStatus;
 use App\Models\BookCopy;
+use App\Models\Fine;
 use App\Models\Loan;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('belongs to user', function (): void {
@@ -29,6 +31,14 @@ test('belongs to reservation', function (): void {
 
     expect($loan->reservation())->toBeInstanceOf(BelongsTo::class);
     expect($loan->reservation)->toBeInstanceOf(Reservation::class);
+});
+
+test('has many fines', function (): void {
+    $loan = Loan::factory()->create();
+    Fine::factory()->count(2)->create(['loan_id' => $loan->id]);
+
+    expect($loan->fines())->toBeInstanceOf(HasMany::class);
+    expect($loan->fines)->toHaveCount(2);
 });
 
 test('casts status to LoanStatus enum', function (): void {
