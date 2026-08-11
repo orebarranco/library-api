@@ -59,6 +59,24 @@ trait ApiResponse
             ->setStatusCode($status);
     }
 
+    /**
+     * A JSON:API document for a computed resource that has no Eloquent model
+     * behind it, such as an aggregate summary.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    protected function successAttributes(string $type, string $id, array $attributes, int $status = Response::HTTP_OK): JsonResponse
+    {
+        return response()->json([
+            'data' => [
+                'type' => $type,
+                'id' => $id,
+                'attributes' => $attributes,
+            ],
+            'meta' => $this->baseMeta(),
+        ], $status, ['Content-Type' => 'application/vnd.api+json']);
+    }
+
     protected function noData(int $status = Response::HTTP_OK): JsonResponse
     {
         return response()->json(

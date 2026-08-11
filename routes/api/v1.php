@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\Catalog\AuthorController;
 use App\Http\Controllers\Api\V1\Catalog\BookController;
 use App\Http\Controllers\Api\V1\Catalog\BookCopyController;
 use App\Http\Controllers\Api\V1\Catalog\CategoryController;
+use App\Http\Controllers\Api\V1\Fine\FineController;
 use App\Http\Controllers\Api\V1\Loan\LoanController;
 use App\Http\Controllers\Api\V1\Reservation\ReservationController;
 use App\Http\Controllers\Api\V1\User\AssignRoleController;
@@ -80,6 +81,22 @@ Route::prefix('loans')->name('loans.')->middleware(['auth:sanctum', 'throttle:ap
     Route::middleware(['role:librarian,admin'])->group(function (): void {
         Route::post('/{loan}/return', [LoanController::class, 'return'])->name('return');
     });
+});
+
+Route::prefix('fines')->name('fines.')->middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
+    Route::get('/', [FineController::class, 'index'])->name('index');
+    Route::get('/{fine}', [FineController::class, 'show'])->name('show');
+    Route::post('/{fine}/pay', [FineController::class, 'pay'])->name('pay');
+
+    Route::middleware(['role:librarian,admin'])->group(function (): void {
+        Route::post('/{fine}/waive', [FineController::class, 'waive'])->name('waive');
+    });
+});
+
+// Registered outside the admin-only users group because a librarian must be able
+// to check a borrower's debt.
+Route::prefix('users')->name('users.')->middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
+    Route::get('/{user}/fines/summary', [FineController::class, 'summary'])->name('fines.summary');
 });
 
 Route::prefix('categories')->name('categories.')->group(function (): void {

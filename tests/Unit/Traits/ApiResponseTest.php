@@ -88,6 +88,31 @@ it('validationError skips non-string messages', function (): void {
         ->and($data['errors'][0]['detail'])->toBe('The email is required.');
 });
 
+it('successAttributes renders a computed JSON:API document', function (): void {
+    $subject = new class
+    {
+        use ApiResponse;
+
+        /** @param array<string, mixed> $attributes */
+        public function callSuccessAttributes(string $type, string $id, array $attributes): JsonResponse
+        {
+            return $this->successAttributes($type, $id, $attributes);
+        }
+    };
+
+    $response = $subject->callSuccessAttributes('fine-summaries', 'user-123', ['pending_total' => 40.0]);
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_OK)
+        ->and($response->headers->get('Content-Type'))->toBe('application/vnd.api+json')
+        ->and($data['data'])->toMatchArray([
+            'type' => 'fine-summaries',
+            'id' => 'user-123',
+            'attributes' => ['pending_total' => 40.0],
+        ])
+        ->and($data['meta'])->toHaveKeys(['request_id', 'version', 'timestamp']);
+});
+
 it('successCollection includes base meta fields', function (): void {
     $users = User::factory()->count(1)->make();
     $paginator = new LengthAwarePaginator($users, 1, 15, 1, ['path' => 'http://localhost/api/v1/users']);

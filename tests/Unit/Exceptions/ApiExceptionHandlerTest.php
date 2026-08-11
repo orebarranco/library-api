@@ -8,6 +8,9 @@ use App\Exceptions\Auth\InsufficientPermissionsException;
 use App\Exceptions\Auth\InvalidCredentialsException;
 use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Exceptions\Catalog\DuplicateIsbnException;
+use App\Exceptions\Fine\FineAlreadyClosedException;
+use App\Exceptions\Fine\PaymentExceedsBalanceException;
+use App\Exceptions\Fine\WaiveLimitExceededException;
 use App\Exceptions\Reservation\DuplicateReservationException;
 use App\Exceptions\Reservation\NoCopiesAvailableException;
 use App\Exceptions\Reservation\OverdueLoansException;
@@ -104,6 +107,30 @@ it('handles UnpaidFinesException as 422', function (): void {
 
     expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
         ->and($data['errors'][0]['code'])->toBe('UNPAID_FINES');
+});
+
+it('handles FineAlreadyClosedException as 422', function (): void {
+    $response = $this->handler->render(new FineAlreadyClosedException('fine-123'));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('FINE_ALREADY_CLOSED');
+});
+
+it('handles PaymentExceedsBalanceException as 422', function (): void {
+    $response = $this->handler->render(new PaymentExceedsBalanceException('fine-123', 12.5));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('PAYMENT_EXCEEDS_BALANCE');
+});
+
+it('handles WaiveLimitExceededException as 422', function (): void {
+    $response = $this->handler->render(new WaiveLimitExceededException('fine-123', 45.0, 20.0));
+    $data = $response->getData(true);
+
+    expect($response->status())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
+        ->and($data['errors'][0]['code'])->toBe('WAIVE_LIMIT_EXCEEDED');
 });
 
 it('handles OverdueLoansException as 422', function (): void {
