@@ -8,10 +8,12 @@ use App\Enums\LoanStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\LoanFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,6 +33,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read User $user
  * @property-read BookCopy $bookCopy
  * @property-read Reservation $reservation
+ * @property-read Collection<int, Fine> $fines
  */
 final class Loan extends Model
 {
@@ -87,6 +90,12 @@ final class Loan extends Model
     public function reservation(): BelongsTo
     {
         return $this->belongsTo(Reservation::class);
+    }
+
+    /** @return HasMany<Fine, $this> */
+    public function fines(): HasMany
+    {
+        return $this->hasMany(Fine::class);
     }
 
     public function isOverdue(): bool

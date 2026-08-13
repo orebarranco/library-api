@@ -12,6 +12,9 @@ use App\Exceptions\Auth\InvalidPasswordResetTokenException;
 use App\Exceptions\Catalog\BookCopyHasActiveLoanException;
 use App\Exceptions\Catalog\BookHasActiveLoansException;
 use App\Exceptions\Catalog\DuplicateIsbnException;
+use App\Exceptions\Fine\FineAlreadyClosedException;
+use App\Exceptions\Fine\PaymentExceedsBalanceException;
+use App\Exceptions\Fine\WaiveLimitExceededException;
 use App\Exceptions\Loan\BookHasReservationsException;
 use App\Exceptions\Loan\LoanAlreadyReturnedException;
 use App\Exceptions\Loan\LoanOverdueException;
@@ -63,6 +66,9 @@ final class ApiExceptionHandler
             $e instanceof BookHasReservationsException => $this->handleBookHasReservations($e),
             $e instanceof RenewalTooLateException => $this->handleRenewalTooLate($e),
             $e instanceof LoanAlreadyReturnedException => $this->handleLoanAlreadyReturned($e),
+            $e instanceof FineAlreadyClosedException => $this->handleFineAlreadyClosed($e),
+            $e instanceof PaymentExceedsBalanceException => $this->handlePaymentExceedsBalance($e),
+            $e instanceof WaiveLimitExceededException => $this->handleWaiveLimitExceeded($e),
             $e instanceof AccountSuspendedException => $this->handleAccountSuspended(),
             $e instanceof InvalidCredentialsException => $this->handleInvalidCredentials($e),
             $e instanceof InvalidPasswordResetTokenException => $this->handleInvalidPasswordResetToken($e),
@@ -236,6 +242,36 @@ final class ApiExceptionHandler
         return $this->error(
             message: 'Loan has already been returned.',
             code: 'LOAN_ALREADY_RETURNED',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleFineAlreadyClosed(FineAlreadyClosedException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Fine is already closed.',
+            code: 'FINE_ALREADY_CLOSED',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handlePaymentExceedsBalance(PaymentExceedsBalanceException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Payment exceeds the remaining balance.',
+            code: 'PAYMENT_EXCEEDS_BALANCE',
+            detail: $e->getMessage(),
+            status: Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
+    }
+
+    private function handleWaiveLimitExceeded(WaiveLimitExceededException $e): JsonResponse
+    {
+        return $this->error(
+            message: 'Waive limit exceeded.',
+            code: 'WAIVE_LIMIT_EXCEEDED',
             detail: $e->getMessage(),
             status: Response::HTTP_UNPROCESSABLE_ENTITY,
         );
