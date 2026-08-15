@@ -10,8 +10,11 @@ use App\DTOs\Loan\ReturnLoanDTO;
 use App\Enums\BookCopyStatus;
 use App\Enums\FineType;
 use App\Enums\LoanStatus;
+use App\Enums\ReservationStatus;
 use App\Exceptions\Loan\LoanAlreadyReturnedException;
 use App\Models\Loan;
+use App\Models\Reservation;
+use App\Notifications\BookAvailableNotification;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -56,7 +59,29 @@ final readonly class ReturnLoanAction
             }
         });
 
+        if (! $dto->damaged) {
+            $this->notifyWaitingReservations($loan);
+        }
+
         return $loan;
+    }
+
+    /**
+     * The freed copy is offered to every member still holding an approved
+     * reservation for the same book; loans consume their own reservation, so
+     * the ones left in APPROVED are genuinely waiting.
+     */
+    private function notifyWaitingReservations(Loan $loan): void
+    {
+        $waiting = Reservation::query()
+            ->with('user')
+            ->where('book_id', $loan->bookCopy->book_id)
+            ->where('status', ReservationStatus::Approved)
+            ->get();
+
+        foreach ($waiting as $reservation) {
+            $reservation->user->notify(new BookAvailableNotification($reservation));
+        }
     }
 
     private function overdueDays(Loan $loan, CarbonInterface $returnedAt): int

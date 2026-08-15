@@ -11,7 +11,10 @@ use App\Enums\UserRole;
 use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Loan;
+use App\Models\Reservation;
 use App\Models\User;
+use App\Notifications\BookAvailableNotification;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
 /**
@@ -151,6 +154,48 @@ it('generates both fines when a damaged copy is returned late', function (): voi
     expect($spy->generated)->toHaveCount(2);
     expect(array_map(fn (GenerateFineDTO $dto): FineType => $dto->type, $spy->generated))
         ->toBe([FineType::LateReturn, FineType::Damage]);
+});
+
+it('BookAvailableNotification sent when book has an approved reservation', function (): void {
+    Notification::fake();
+    Sanctum::actingAs($this->librarian);
+
+    $waiting = User::factory()->create(['role' => UserRole::User]);
+    Reservation::factory()->approved()->create([
+        'book_id' => $this->book->id,
+        'user_id' => $waiting->id,
+    ]);
+
+    $this->postJson($this->endpoint)->assertOk();
+
+    Notification::assertSentTo($waiting, BookAvailableNotification::class);
+});
+
+it('no notification sent when book has no approved reservations', function (): void {
+    Notification::fake();
+    Sanctum::actingAs($this->librarian);
+
+    Reservation::factory()->pending()->create(['book_id' => $this->book->id]);
+
+    $this->postJson($this->endpoint)->assertOk();
+
+    Notification::assertNothingSent();
+});
+
+it('announces no availability when the returned copy goes to maintenance', function (): void {
+    Notification::fake();
+    Sanctum::actingAs($this->librarian);
+
+    $waiting = User::factory()->create(['role' => UserRole::User]);
+    Reservation::factory()->approved()->create([
+        'book_id' => $this->book->id,
+        'user_id' => $waiting->id,
+    ]);
+
+    $this->postJson($this->endpoint, ['damaged' => true, 'damage_amount' => 20])
+        ->assertOk();
+
+    Notification::assertNothingSent();
 });
 
 it('returns 422 when damaged is true without a damage amount', function (): void {
