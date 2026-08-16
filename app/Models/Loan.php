@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $renewal_count
  * @property LoanStatus $status
  * @property-read int $days_overdue
+ * @property-read float $late_fee
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
  * @property CarbonInterface|null $deleted_at
@@ -42,6 +43,10 @@ final class Loan extends Model
 
     use HasUlids;
     use SoftDeletes;
+
+    private const float LATE_FEE_PER_DAY = 2.0;
+
+    private const float LATE_FEE_CAP = 60.0;
 
     /**
      * @var list<string>
@@ -120,5 +125,19 @@ final class Loan extends Model
 
             return (int) $this->due_date->diffInDays($reference, absolute: true);
         });
+    }
+
+    /**
+     * Late fee owed for this loan: it accrues at $2.00 per overdue day and is
+     * capped at $60.00, which the loan reaches after 30 days.
+     *
+     * @return Attribute<float, never>
+     */
+    protected function lateFee(): Attribute
+    {
+        return Attribute::get(fn (): float => min(
+            $this->days_overdue * self::LATE_FEE_PER_DAY,
+            self::LATE_FEE_CAP,
+        ));
     }
 }
