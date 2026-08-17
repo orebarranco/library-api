@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,6 +32,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Category $category
  * @property-read Collection<int, BookCopy> $copies
  * @property-read Collection<int, Reservation> $reservations
+ * @property-read Collection<int, Loan> $loans
+ * @property-read int $total_loans
  */
 final class Book extends Model
 {
@@ -90,5 +93,16 @@ final class Book extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * Every loan ever taken on any copy of this title. Loans hang off copies,
+     * not off books, so demand for a title is only measurable through them.
+     *
+     * @return HasManyThrough<Loan, BookCopy, $this>
+     */
+    public function loans(): HasManyThrough
+    {
+        return $this->hasManyThrough(Loan::class, BookCopy::class);
     }
 }

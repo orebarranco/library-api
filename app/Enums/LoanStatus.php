@@ -10,9 +10,19 @@ enum LoanStatus: string
     case Overdue = 'overdue';
     case Returned = 'returned';
 
+    /**
+     * Statuses of a loan whose copy is still in the borrower's hands.
+     *
+     * @return list<self>
+     */
+    public static function open(): array
+    {
+        return [self::Active, self::Overdue];
+    }
+
     public function isOpen(): bool
     {
-        return in_array($this, [self::Active, self::Overdue], true);
+        return in_array($this, self::open(), true);
     }
 
     public function isRenewable(): bool
