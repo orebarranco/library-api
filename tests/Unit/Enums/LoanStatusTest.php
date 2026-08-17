@@ -17,6 +17,10 @@ test('isOpen is true for active and overdue only', function (): void {
     expect(LoanStatus::Returned->isOpen())->toBeFalse();
 });
 
+test('lists active and overdue as the open statuses', function (): void {
+    expect(LoanStatus::open())->toBe([LoanStatus::Active, LoanStatus::Overdue]);
+});
+
 test('isRenewable is true for active only', function (): void {
     expect(LoanStatus::Active->isRenewable())->toBeTrue();
     expect(LoanStatus::Overdue->isRenewable())->toBeFalse();

@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\Catalog\BookCopyController;
 use App\Http\Controllers\Api\V1\Catalog\CategoryController;
 use App\Http\Controllers\Api\V1\Fine\FineController;
 use App\Http\Controllers\Api\V1\Loan\LoanController;
+use App\Http\Controllers\Api\V1\Report\ReportController;
 use App\Http\Controllers\Api\V1\Reservation\ReservationController;
 use App\Http\Controllers\Api\V1\User\AssignRoleController;
 use App\Http\Controllers\Api\V1\User\SuspendUserController;
@@ -97,6 +98,14 @@ Route::prefix('fines')->name('fines.')->middleware(['auth:sanctum', 'throttle:ap
 // to check a borrower's debt.
 Route::prefix('users')->name('users.')->middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
     Route::get('/{user}/fines/summary', [FineController::class, 'summary'])->name('fines.summary');
+});
+
+Route::prefix('reports')->name('reports.')->middleware(['auth:sanctum', 'role:librarian,admin', 'throttle:api'])->group(function (): void {
+    Route::get('/dashboard', [ReportController::class, 'dashboard'])->name('dashboard');
+    Route::get('/active-loans', [ReportController::class, 'activeLoans'])->name('active-loans');
+    Route::get('/overdue-loans', [ReportController::class, 'overdueLoans'])->name('overdue-loans');
+    Route::get('/pending-reservations', [ReportController::class, 'pendingReservations'])->name('pending-reservations');
+    Route::get('/popular-books', [ReportController::class, 'popularBooks'])->name('popular-books');
 });
 
 Route::prefix('categories')->name('categories.')->group(function (): void {

@@ -55,7 +55,7 @@ final class LoanController
     {
         $query = Loan::query()
             ->with('user')
-            ->whereIn('status', [LoanStatus::Active, LoanStatus::Overdue])
+            ->whereIn('status', LoanStatus::open())
             ->where('due_date', '<', now());
 
         $loans = QueryBuilder::for($query)
