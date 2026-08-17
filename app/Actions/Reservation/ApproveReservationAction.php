@@ -8,6 +8,7 @@ use App\Enums\ReservationStatus;
 use App\Exceptions\Reservation\ReservationNotPendingException;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Notifications\ReservationApprovedNotification;
 
 final readonly class ApproveReservationAction
 {
@@ -27,6 +28,10 @@ final readonly class ApproveReservationAction
             'approved_by' => $actingUser->id,
             'expires_at' => $approvedAt->clone()->addHours(self::PICKUP_WINDOW_HOURS),
         ]);
+
+        // Strict mode forbids lazy loading, so the recipient is fetched explicitly.
+        $reservation->loadMissing('user');
+        $reservation->user->notify(new ReservationApprovedNotification($reservation));
 
         return $reservation;
     }

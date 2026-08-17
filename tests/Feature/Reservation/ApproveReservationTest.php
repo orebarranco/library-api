@@ -6,6 +6,8 @@ use App\Enums\ReservationStatus;
 use App\Enums\UserRole;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Notifications\ReservationApprovedNotification;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -36,6 +38,31 @@ it('status changes to approved with approved_at expires_at and approved_by set',
         'status' => ReservationStatus::Approved->value,
         'approved_by' => $this->librarian->id,
     ]);
+});
+
+it('user receives ReservationApprovedNotification on approval', function (): void {
+    Notification::fake();
+    Sanctum::actingAs($this->librarian);
+
+    $this->postJson("/api/v1/reservations/{$this->reservation->id}/approve")
+        ->assertSuccessful();
+
+    Notification::assertSentTo(
+        $this->reservation->loadMissing('user')->user,
+        ReservationApprovedNotification::class,
+    );
+});
+
+it('does not notify when approval is rejected as not pending', function (): void {
+    Notification::fake();
+    Sanctum::actingAs($this->librarian);
+
+    $rejected = Reservation::factory()->rejected()->create();
+
+    $this->postJson("/api/v1/reservations/{$rejected->id}/approve")
+        ->assertUnprocessable();
+
+    Notification::assertNothingSent();
 });
 
 it('returns 422 RESERVATION_NOT_PENDING if reservation is not pending', function (): void {

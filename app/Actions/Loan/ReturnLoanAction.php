@@ -10,17 +10,15 @@ use App\DTOs\Loan\ReturnLoanDTO;
 use App\Enums\BookCopyStatus;
 use App\Enums\FineType;
 use App\Enums\LoanStatus;
+use App\Enums\ReservationStatus;
 use App\Exceptions\Loan\LoanAlreadyReturnedException;
 use App\Models\Loan;
-use Carbon\CarbonInterface;
+use App\Models\Reservation;
+use App\Notifications\BookAvailableNotification;
 use Illuminate\Support\Facades\DB;
 
 final readonly class ReturnLoanAction
 {
-    private const float LATE_FEE_PER_DAY = 2.0;
-
-    private const float LATE_FEE_CAP = 60.0;
-
     public function __construct(
         private FineGenerator $fineGenerator,
     ) {}
@@ -34,10 +32,13 @@ final readonly class ReturnLoanAction
         // Strict mode forbids lazy loading, so the copy is fetched before the transaction.
         $loan->loadMissing('bookCopy');
 
+        // Read before the update: both accessors fall back to the present moment
+        // while returned_at is still null, which is exactly the return instant.
         $returnedAt = now();
-        $overdueDays = $this->overdueDays($loan, $returnedAt);
+        $overdueDays = $loan->days_overdue;
+        $lateFee = $loan->late_fee;
 
-        DB::transaction(function () use ($loan, $dto, $returnedAt, $overdueDays): void {
+        DB::transaction(function () use ($loan, $dto, $returnedAt, $overdueDays, $lateFee): void {
             $loan->update([
                 'returned_at' => $returnedAt,
                 'status' => LoanStatus::Returned,
@@ -48,7 +49,7 @@ final readonly class ReturnLoanAction
             ]);
 
             if ($overdueDays > 0) {
-                $this->generateLateReturnFine($loan, $overdueDays);
+                $this->generateLateReturnFine($loan, $overdueDays, $lateFee);
             }
 
             if ($dto->damaged && $dto->damage_amount !== null) {
@@ -56,25 +57,33 @@ final readonly class ReturnLoanAction
             }
         });
 
+        if (! $dto->damaged) {
+            $this->notifyWaitingReservations($loan);
+        }
+
         return $loan;
     }
 
-    private function overdueDays(Loan $loan, CarbonInterface $returnedAt): int
+    /**
+     * The freed copy is offered to every member still holding an approved
+     * reservation for the same book; loans consume their own reservation, so
+     * the ones left in APPROVED are genuinely waiting.
+     */
+    private function notifyWaitingReservations(Loan $loan): void
     {
-        if ($returnedAt->lessThanOrEqualTo($loan->due_date)) {
-            return 0;
-        }
+        $waiting = Reservation::query()
+            ->with('user')
+            ->where('book_id', $loan->bookCopy->book_id)
+            ->where('status', ReservationStatus::Approved)
+            ->get();
 
-        return (int) $loan->due_date->diffInDays($returnedAt, absolute: true);
+        foreach ($waiting as $reservation) {
+            $reservation->user->notify(new BookAvailableNotification($reservation));
+        }
     }
 
-    /**
-     * Late fees accrue at $2.00 per overdue day and are capped at $60.00 (30 days).
-     */
-    private function generateLateReturnFine(Loan $loan, int $overdueDays): void
+    private function generateLateReturnFine(Loan $loan, int $overdueDays, float $amount): void
     {
-        $amount = min($overdueDays * self::LATE_FEE_PER_DAY, self::LATE_FEE_CAP);
-
         $this->fineGenerator->generate(new GenerateFineDTO(
             user_id: $loan->user_id,
             type: FineType::LateReturn,
