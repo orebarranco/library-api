@@ -52,11 +52,14 @@ trait LogsActivity
         $oldValues = [];
         $newValues = [];
 
-        foreach ($model->getChanges() as $attribute => $value) {
-            if ($attribute === $model->getUpdatedAtColumn()) {
-                continue;
-            }
+        $changes = $model->getChanges();
 
+        // unset rather than a guard inside the loop: whether updated_at is even
+        // reported as changed depends on the write landing in a later second
+        // than the read, which would make this branch run or not run by clock.
+        unset($changes[$model->getUpdatedAtColumn()]);
+
+        foreach ($changes as $attribute => $value) {
             // An attribute the record did not carry before reads as null rather
             // than being omitted, so both sides of the entry line up.
             $oldValues[(string) $attribute] = $original[$attribute] ?? null;
