@@ -106,6 +106,13 @@ Route::prefix('reports')->name('reports.')->middleware(['auth:sanctum', 'role:li
     Route::get('/overdue-loans', [ReportController::class, 'overdueLoans'])->name('overdue-loans');
     Route::get('/pending-reservations', [ReportController::class, 'pendingReservations'])->name('pending-reservations');
     Route::get('/popular-books', [ReportController::class, 'popularBooks'])->name('popular-books');
+
+    Route::middleware(['role:admin'])->group(function (): void {
+        Route::get('/user-activity', [ReportController::class, 'userActivity'])->name('user-activity');
+        Route::get('/inventory-status', [ReportController::class, 'inventoryStatus'])->name('inventory-status');
+        Route::get('/fines-revenue', [ReportController::class, 'finesRevenue'])->name('fines-revenue');
+        Route::get('/trends/{type}', [ReportController::class, 'trends'])->name('trends');
+    });
 });
 
 Route::prefix('categories')->name('categories.')->group(function (): void {
