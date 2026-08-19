@@ -58,7 +58,7 @@ Route::prefix('book-copies')->name('book-copies.')->middleware(['auth:sanctum', 
 
 Route::prefix('reservations')->name('reservations.')->middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::get('/', [ReservationController::class, 'index'])->name('index');
-    Route::post('/', [ReservationController::class, 'store'])->name('store');
+    Route::post('/', [ReservationController::class, 'store'])->name('store')->middleware('throttle:critical');
     Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
     Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->name('destroy');
     Route::middleware(['role:librarian,admin'])->group(function (): void {
@@ -72,7 +72,7 @@ Route::prefix('loans')->name('loans.')->middleware(['auth:sanctum', 'throttle:ap
 
     // Registered before the /{loan} routes so the literal segment wins over model binding.
     Route::middleware(['role:librarian,admin'])->group(function (): void {
-        Route::post('/', [LoanController::class, 'store'])->name('store');
+        Route::post('/', [LoanController::class, 'store'])->name('store')->middleware('throttle:critical');
         Route::get('/overdue', [LoanController::class, 'overdue'])->name('overdue');
     });
 
@@ -87,7 +87,7 @@ Route::prefix('loans')->name('loans.')->middleware(['auth:sanctum', 'throttle:ap
 Route::prefix('fines')->name('fines.')->middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::get('/', [FineController::class, 'index'])->name('index');
     Route::get('/{fine}', [FineController::class, 'show'])->name('show');
-    Route::post('/{fine}/pay', [FineController::class, 'pay'])->name('pay');
+    Route::post('/{fine}/pay', [FineController::class, 'pay'])->name('pay')->middleware('throttle:critical');
 
     Route::middleware(['role:librarian,admin'])->group(function (): void {
         Route::post('/{fine}/waive', [FineController::class, 'waive'])->name('waive');

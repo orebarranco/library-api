@@ -78,7 +78,7 @@ final class ApiExceptionHandler
             $e instanceof AuthorizationException => $this->handleAuthorization(),
             $e instanceof ModelNotFoundException,
             $e instanceof NotFoundHttpException => $this->handleNotFound(),
-            $e instanceof TooManyRequestsHttpException => $this->handleThrottle(),
+            $e instanceof TooManyRequestsHttpException => $this->handleThrottle($e),
             $e instanceof InvalidSignatureException => $this->handleInvalidSignature(),
             $e instanceof AccessDeniedHttpException && $e->getPrevious() instanceof InsufficientPermissionsException => $this->handleInsufficientPermissions(),
             $e instanceof AccessDeniedHttpException && $e->getPrevious() instanceof AuthorizationException => $this->handleAuthorization(),
@@ -362,14 +362,20 @@ final class ApiExceptionHandler
         );
     }
 
-    private function handleThrottle(): JsonResponse
+    /**
+     * The throttle middleware records how long the caller must wait on the
+     * exception itself, so those headers are carried over onto the JSON:API
+     * body this handler substitutes. Without them a 429 tells a client that it
+     * was blocked but not when to come back.
+     */
+    private function handleThrottle(TooManyRequestsHttpException $e): JsonResponse
     {
         return $this->error(
             message: 'Too Many Requests.',
             code: 'TOO_MANY_REQUESTS',
             detail: 'You have exceeded the request rate limit.',
             status: Response::HTTP_TOO_MANY_REQUESTS,
-        );
+        )->withHeaders($e->getHeaders());
     }
 
     private function handleInvalidSignature(): JsonResponse
