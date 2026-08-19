@@ -8,7 +8,11 @@ use App\Enums\ReportPeriod;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-final class PopularBooksRequest extends FormRequest
+/**
+ * The `?period=` filter shared by every report that can be narrowed to a
+ * rolling window.
+ */
+final class PeriodRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -26,7 +30,7 @@ final class PopularBooksRequest extends FormRequest
     }
 
     /**
-     * The window to rank within, or null when the ranking covers all time.
+     * The window to report on, or null when the report covers all time.
      */
     public function period(): ?ReportPeriod
     {

@@ -72,6 +72,15 @@ jobs:
         run: composer test:lint
 
       - name: Type coverage
+        # pest-plugin-type-coverage forks a worker per file and they all write
+        # the same vendor cache file. Its lock gives up after 100ms and writes
+        # anyway (Support/Cache.php::withinLock), so on a contended runner two
+        # workers interleave their bytes and the next run dies parsing it.
+        # Budgeting more memory per process than the runner has forces the pool
+        # down to a single worker, which removes the race. Measured on this
+        # suite the serial run is not slower — forking cost more than it saved.
+        env:
+          FORK_MEM_PER_PROC: 68719476736 # 64 GB, above any runner
         run: composer test:type-coverage
 
       - name: Tests and code coverage
