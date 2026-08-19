@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Loan;
 
 use App\DTOs\Loan\CreateLoanDTO;
+use App\Enums\AuditAction;
 use App\Enums\BookCopyStatus;
 use App\Enums\LoanStatus;
 use App\Enums\ReservationStatus;
@@ -13,10 +14,13 @@ use App\Exceptions\Reservation\NoCopiesAvailableException;
 use App\Models\BookCopy;
 use App\Models\Loan;
 use App\Models\Reservation;
+use App\Traits\LogsActivity;
 use Illuminate\Support\Facades\DB;
 
 final readonly class CreateLoanAction
 {
+    use LogsActivity;
+
     private const int LOAN_PERIOD_DAYS = 14;
 
     public function execute(CreateLoanDTO $dto): Loan
@@ -44,6 +48,9 @@ final readonly class CreateLoanAction
 
             $copy->update(['status' => BookCopyStatus::Loaned]);
             $reservation->update(['status' => ReservationStatus::Completed]);
+
+            // A creation has no prior state, so only the new side is recorded.
+            self::log(AuditAction::LoanCreated, $loan, newValues: $loan->getAttributes());
 
             return $loan;
         });

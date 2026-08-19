@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\AuditLog\AuditLogController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\LogoutController;
@@ -113,6 +114,10 @@ Route::prefix('reports')->name('reports.')->middleware(['auth:sanctum', 'role:li
         Route::get('/fines-revenue', [ReportController::class, 'finesRevenue'])->name('fines-revenue');
         Route::get('/trends/{type}', [ReportController::class, 'trends'])->name('trends');
     });
+});
+
+Route::prefix('audit-logs')->name('audit-logs.')->middleware(['auth:sanctum', 'role:admin', 'throttle:api'])->group(function (): void {
+    Route::get('/', [AuditLogController::class, 'index'])->name('index');
 });
 
 Route::prefix('categories')->name('categories.')->group(function (): void {

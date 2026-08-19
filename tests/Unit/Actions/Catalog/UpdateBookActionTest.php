@@ -8,8 +8,13 @@ use App\Exceptions\Catalog\DuplicateIsbnException;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\User;
 
+// Every audited action records who performed it, so these unit tests act as a
+// user the same way the HTTP routes behind them always do.
 beforeEach(function (): void {
+    test()->actingAs(User::factory()->create());
+
     $this->action = new UpdateBookAction();
     $this->author = Author::factory()->create();
     $this->category = Category::factory()->create();

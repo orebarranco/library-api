@@ -12,6 +12,7 @@ use App\Enums\LoanStatus;
 use App\Exceptions\Loan\LoanAlreadyReturnedException;
 use App\Models\BookCopy;
 use App\Models\Loan;
+use App\Models\User;
 
 /**
  * Captures the fines requested during a return so amounts and types can be
@@ -31,7 +32,11 @@ function recordingFineGenerator(): FineGenerator
     };
 }
 
+// Every audited action records who performed it, so these unit tests act as a
+// user the same way the HTTP routes behind them always do.
 beforeEach(function (): void {
+    test()->actingAs(User::factory()->create());
+
     $this->generator = recordingFineGenerator();
     $this->action = new ReturnLoanAction($this->generator);
     $this->copy = BookCopy::factory()->create(['status' => BookCopyStatus::Loaned]);
