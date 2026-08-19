@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Catalog;
 
 use App\DTOs\Catalog\UpdateBookDTO;
+use App\Enums\AuditAction;
 use App\Exceptions\Catalog\DuplicateIsbnException;
 use App\Models\Book;
+use App\Traits\LogsActivity;
 
 final class UpdateBookAction
 {
+    use LogsActivity;
+
     public function execute(Book $book, UpdateBookDTO $data): Book
     {
         if ($data->isbn !== null && $data->isbn !== $book->isbn && Book::query()->where('isbn', $data->isbn)->exists()) {
@@ -27,7 +31,11 @@ final class UpdateBookAction
             'category_id' => $data->category_id,
         ], fn (mixed $value): bool => $value !== null);
 
+        $original = $book->getAttributes();
+
         $book->update($attributes);
+
+        self::logChanges(AuditAction::BookUpdated, $book, $original);
 
         return $book->refresh();
     }

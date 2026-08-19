@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace App\Actions\Fine;
 
 use App\DTOs\Fine\WaiveFineDTO;
+use App\Enums\AuditAction;
 use App\Enums\FineStatus;
 use App\Enums\UserRole;
 use App\Exceptions\Fine\FineAlreadyClosedException;
 use App\Exceptions\Fine\WaiveLimitExceededException;
 use App\Models\Fine;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Illuminate\Support\Facades\DB;
 
 final readonly class WaiveFineAction
 {
+    use LogsActivity;
+
     private const float LIBRARIAN_WAIVE_LIMIT = 20.0;
 
     public function __construct(
@@ -29,6 +33,8 @@ final readonly class WaiveFineAction
 
         $this->guardWaiveLimit($fine, $actingUser);
 
+        $original = $fine->getAttributes();
+
         DB::transaction(function () use ($fine, $dto, $actingUser): void {
             $fine->update([
                 'status' => FineStatus::Waived,
@@ -40,6 +46,8 @@ final readonly class WaiveFineAction
             // it must not stay locked.
             $this->reconcileAccountSuspension->execute(User::query()->findOrFail($fine->user_id));
         });
+
+        self::logChanges(AuditAction::FineWaived, $fine, $original);
 
         return $fine;
     }

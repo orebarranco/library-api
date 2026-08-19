@@ -7,6 +7,7 @@ namespace App\Actions\Loan;
 use App\Contracts\FineGenerator;
 use App\DTOs\Fine\GenerateFineDTO;
 use App\DTOs\Loan\ReturnLoanDTO;
+use App\Enums\AuditAction;
 use App\Enums\BookCopyStatus;
 use App\Enums\FineType;
 use App\Enums\LoanStatus;
@@ -15,10 +16,13 @@ use App\Exceptions\Loan\LoanAlreadyReturnedException;
 use App\Models\Loan;
 use App\Models\Reservation;
 use App\Notifications\BookAvailableNotification;
+use App\Traits\LogsActivity;
 use Illuminate\Support\Facades\DB;
 
 final readonly class ReturnLoanAction
 {
+    use LogsActivity;
+
     public function __construct(
         private FineGenerator $fineGenerator,
     ) {}
@@ -37,6 +41,7 @@ final readonly class ReturnLoanAction
         $returnedAt = now();
         $overdueDays = $loan->days_overdue;
         $lateFee = $loan->late_fee;
+        $original = $loan->getAttributes();
 
         DB::transaction(function () use ($loan, $dto, $returnedAt, $overdueDays, $lateFee): void {
             $loan->update([
@@ -56,6 +61,8 @@ final readonly class ReturnLoanAction
                 $this->generateDamageFine($loan, $dto->damage_amount);
             }
         });
+
+        self::logChanges(AuditAction::LoanReturned, $loan, $original);
 
         if (! $dto->damaged) {
             $this->notifyWaitingReservations($loan);

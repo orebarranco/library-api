@@ -13,7 +13,11 @@ use App\Exceptions\Fine\WaiveLimitExceededException;
 use App\Models\Fine;
 use App\Models\User;
 
+// Every audited action records who performed it, so these unit tests act as a
+// user the same way the HTTP routes behind them always do.
 beforeEach(function (): void {
+    test()->actingAs(User::factory()->create());
+
     $this->action = new WaiveFineAction(new ReconcileAccountSuspensionAction());
     $this->librarian = User::factory()->create(['role' => UserRole::Librarian]);
     $this->admin = User::factory()->create(['role' => UserRole::Admin]);
