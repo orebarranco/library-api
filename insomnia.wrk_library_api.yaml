@@ -1116,6 +1116,688 @@ collection:
             send: true
             store: true
           rebuildPath: true
+  - name: Loans
+    meta:
+      id: fld_loans
+      created: 1700000650000
+      modified: 1700000650000
+      sortKey: -1400000
+      description: Loan checkout, renewal and return
+    children:
+      - url: "{{ base_url }}/loans"
+        name: List Loans
+        meta:
+          id: req_loans_index
+          created: 1700004000000
+          modified: 1700004000000
+          isPrivate: false
+          description: "Librarians/admins see all loans; regular users only see their own."
+          sortKey: -4300000
+        method: GET
+        parameters:
+          - name: filter[status]
+            value: "active"
+            description: ""
+            disabled: true
+          - name: sort
+            value: "-created_at"
+            description: ""
+            disabled: false
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('loan_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/loans"
+        name: Create Loan
+        meta:
+          id: req_loans_store
+          created: 1700004100000
+          modified: 1700004100000
+          isPrivate: false
+          description: "Librarian/admin only. Requires an APPROVED reservation. Rate limited to 10 req/min."
+          sortKey: -4400000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"reservation_id":"{{ reservation_id }}"}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.id) {
+              insomnia.environment.set('loan_id', json.data.id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/loans/overdue"
+        name: List Overdue Loans
+        meta:
+          id: req_loans_overdue
+          created: 1700004200000
+          modified: 1700004200000
+          isPrivate: false
+          description: "Librarian/admin only. Each entry carries days_overdue."
+          sortKey: -4500000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/loans/{{ loan_id }}"
+        name: Show Loan
+        meta:
+          id: req_loans_show
+          created: 1700004300000
+          modified: 1700004300000
+          isPrivate: false
+          description: ""
+          sortKey: -4600000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/loans/{{ loan_id }}/renew"
+        name: Renew Loan
+        meta:
+          id: req_loans_renew
+          created: 1700004400000
+          modified: 1700004400000
+          isPrivate: false
+          description: "Extends the due date. Fails if the renewal limit is reached, the loan is overdue or it is too late to renew."
+          sortKey: -4700000
+        method: POST
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/loans/{{ loan_id }}/return"
+        name: Return Loan
+        meta:
+          id: req_loans_return
+          created: 1700004500000
+          modified: 1700004500000
+          isPrivate: false
+          description: "Librarian/admin only. damage_amount is required when damaged is true (5-50)."
+          sortKey: -4800000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"damaged":false}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Fines
+    meta:
+      id: fld_fines
+      created: 1700000660000
+      modified: 1700000660000
+      sortKey: -1300000
+      description: Fines, payments and waivers
+    children:
+      - url: "{{ base_url }}/fines"
+        name: List Fines
+        meta:
+          id: req_fines_index
+          created: 1700004600000
+          modified: 1700004600000
+          isPrivate: false
+          description: "Librarians/admins see all fines; regular users only see their own."
+          sortKey: -4900000
+        method: GET
+        parameters:
+          - name: filter[status]
+            value: "pending"
+            description: ""
+            disabled: true
+          - name: sort
+            value: "-created_at"
+            description: ""
+            disabled: false
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        scripts:
+          afterResponse: |-
+            const json = insomnia.response.json();
+            if (json?.data?.[0]?.id) {
+              insomnia.environment.set('fine_id', json.data[0].id);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/fines/{{ fine_id }}"
+        name: Show Fine
+        meta:
+          id: req_fines_show
+          created: 1700004700000
+          modified: 1700004700000
+          isPrivate: false
+          description: ""
+          sortKey: -5000000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/fines/{{ fine_id }}/pay"
+        name: Pay Fine
+        meta:
+          id: req_fines_pay
+          created: 1700004800000
+          modified: 1700004800000
+          isPrivate: false
+          description: "Partial payments are allowed. Paying more than the outstanding balance is rejected. Rate limited to 10 req/min."
+          sortKey: -5100000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"amount":5.00}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/fines/{{ fine_id }}/waive"
+        name: Waive Fine
+        meta:
+          id: req_fines_waive
+          created: 1700004900000
+          modified: 1700004900000
+          isPrivate: false
+          description: "Librarian/admin only. Librarians can only waive fines up to 20.00; admins have no ceiling."
+          sortKey: -5200000
+        method: POST
+        body:
+          mimeType: application/json
+          text: '{"reason":"Goodwill gesture after a service outage."}'
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/users/{{ user_id }}/fines/summary"
+        name: User Fines Summary
+        meta:
+          id: req_fines_summary
+          created: 1700005000000
+          modified: 1700005000000
+          isPrivate: false
+          description: "Librarian/admin only. Outstanding balance for one borrower."
+          sortKey: -5300000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Reports
+    meta:
+      id: fld_reports
+      created: 1700000670000
+      modified: 1700000670000
+      sortKey: -1200000
+      description: Librarian dashboard and admin analytics
+    children:
+      - url: "{{ base_url }}/reports/dashboard"
+        name: Dashboard
+        meta:
+          id: req_reports_dashboard
+          created: 1700005100000
+          modified: 1700005100000
+          isPrivate: false
+          description: "Librarian/admin. Snapshot counts. overdue_loans_count is a subset of active_loans_count."
+          sortKey: -5400000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/active-loans"
+        name: Active Loans
+        meta:
+          id: req_reports_active_loans
+          created: 1700005200000
+          modified: 1700005200000
+          isPrivate: false
+          description: "Librarian/admin. Paginated loans whose copy has not come back yet."
+          sortKey: -5500000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/overdue-loans"
+        name: Overdue Loans
+        meta:
+          id: req_reports_overdue_loans
+          created: 1700005300000
+          modified: 1700005300000
+          isPrivate: false
+          description: "Librarian/admin. Each entry carries days_overdue."
+          sortKey: -5600000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/pending-reservations"
+        name: Pending Reservations
+        meta:
+          id: req_reports_pending_reservations
+          created: 1700005400000
+          modified: 1700005400000
+          isPrivate: false
+          description: "Librarian/admin. Reservations still awaiting a decision."
+          sortKey: -5700000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/popular-books"
+        name: Popular Books
+        meta:
+          id: req_reports_popular_books
+          created: 1700005500000
+          modified: 1700005500000
+          isPrivate: false
+          description: "Librarian/admin. Titles ranked by loan count. Without ?period= the ranking covers all time."
+          sortKey: -5800000
+        method: GET
+        parameters:
+          - name: period
+            value: "30days"
+            description: ""
+            disabled: true
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/user-activity"
+        name: User Activity
+        meta:
+          id: req_reports_user_activity
+          created: 1700005600000
+          modified: 1700005600000
+          isPrivate: false
+          description: "Admin only. Borrowers ranked by activity. Inactive accounts appear last with zeroed counts."
+          sortKey: -5900000
+        method: GET
+        parameters:
+          - name: period
+            value: "30days"
+            description: ""
+            disabled: true
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/inventory-status"
+        name: Inventory Status
+        meta:
+          id: req_reports_inventory_status
+          created: 1700005700000
+          modified: 1700005700000
+          isPrivate: false
+          description: "Admin only. Copy counts per status per book. A shelf snapshot, so no period filter applies."
+          sortKey: -6000000
+        method: GET
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/fines-revenue"
+        name: Fines Revenue
+        meta:
+          id: req_reports_fines_revenue
+          created: 1700005800000
+          modified: 1700005800000
+          isPrivate: false
+          description: "Admin only. Generated, collected, waived and outstanding money."
+          sortKey: -6100000
+        method: GET
+        parameters:
+          - name: period
+            value: "30days"
+            description: ""
+            disabled: true
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/trends/category"
+        name: Trends by Category
+        meta:
+          id: req_reports_trends_category
+          created: 1700005900000
+          modified: 1700005900000
+          isPrivate: false
+          description: "Admin only. Loan volume per category. The window defaults to 1year."
+          sortKey: -6200000
+        method: GET
+        parameters:
+          - name: period
+            value: "30days"
+            description: ""
+            disabled: true
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/reports/trends/month"
+        name: Trends by Month
+        meta:
+          id: req_reports_trends_month
+          created: 1700006000000
+          modified: 1700006000000
+          isPrivate: false
+          description: "Admin only. Loan volume per calendar month, oldest first. The window defaults to 1year."
+          sortKey: -6300000
+        method: GET
+        parameters:
+          - name: period
+            value: "30days"
+            description: ""
+            disabled: true
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Audit Logs
+    meta:
+      id: fld_audit_logs
+      created: 1700000680000
+      modified: 1700000680000
+      sortKey: -1100000
+      description: Append-only trail of critical operations (admin only)
+    children:
+      - url: "{{ base_url }}/audit-logs"
+        name: List Audit Logs
+        meta:
+          id: req_audit_logs_index
+          created: 1700006100000
+          modified: 1700006100000
+          isPrivate: false
+          description: "Admin only. Newest first. Read-only by design: the trail has no write verbs."
+          sortKey: -6400000
+        method: GET
+        parameters:
+          - name: filter[action]
+            value: "loan.created"
+            description: ""
+            disabled: true
+          - name: filter[user_id]
+            value: "{{ user_id }}"
+            description: ""
+            disabled: true
+          - name: filter[model_type]
+            value: "Loan"
+            description: ""
+            disabled: true
+          - name: include
+            value: "user"
+            description: ""
+            disabled: false
+        headers:
+          - name: Accept
+            value: application/vnd.api+json
+        authentication:
+          type: bearer
+          token: "{{ token }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
 cookieJar:
   name: Default Jar
   meta:
@@ -1152,4 +1834,6 @@ environments:
         category_id: ""
         reset_token: ""
         reservation_id: ""
+        loan_id: ""
+        fine_id: ""
       color: "#87e8de"
