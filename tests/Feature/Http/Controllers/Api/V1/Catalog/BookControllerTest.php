@@ -88,6 +88,18 @@ it('search by publisher returns matching books', function (): void {
         ->assertJsonPath('data.0.attributes.title', 'Clean Code');
 });
 
+it('search treats a comma as part of the term, not a list separator', function (): void {
+    $author = Author::factory()->create(['name' => 'Robert Martin']);
+
+    Book::factory()->create(['title' => 'Clean Code, Refactored', 'author_id' => $author->id]);
+    Book::factory()->create(['title' => 'Clean Code', 'author_id' => $author->id]);
+
+    $this->getJson($this->endpoint.'?filter[search]=Code, Refactored')
+        ->assertSuccessful()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.attributes.title', 'Clean Code, Refactored');
+});
+
 it('filter by category_id returns correct books', function (): void {
     $category = Category::factory()->create();
     $other = Category::factory()->create();
