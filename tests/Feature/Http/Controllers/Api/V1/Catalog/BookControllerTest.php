@@ -47,8 +47,9 @@ it('search by title returns matching books', function (): void {
 
 it('search by author name returns matching books', function (): void {
     $author = Author::factory()->create(['name' => 'Jane Austen']);
+    $other = Author::factory()->create(['name' => 'Mark Twain']);
     Book::factory()->create(['author_id' => $author->id, 'title' => 'Pride and Prejudice']);
-    Book::factory()->create(['title' => 'Some Other Book']);
+    Book::factory()->create(['author_id' => $other->id, 'title' => 'Some Other Book']);
 
     $this->getJson($this->endpoint.'?filter[search]=Jane')
         ->assertSuccessful()
