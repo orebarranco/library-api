@@ -30,12 +30,17 @@ final class BookController
             ->allowedFilters(
                 AllowedFilter::exact('author_id'),
                 AllowedFilter::exact('category_id'),
-                AllowedFilter::callback('search', function (Builder $query, string $value): void {
-                    $query->where(function (Builder $q) use ($value): void {
-                        $q->where('title', 'like', "%{$value}%")
-                            ->orWhere('isbn', 'like', "%{$value}%")
-                            ->orWhere('publisher', 'like', "%{$value}%")
-                            ->orWhereHas('author', fn (Builder $q2) => $q2->where('name', 'like', "%{$value}%"));
+                AllowedFilter::callback('search', function (Builder $query, mixed $value): void {
+                    // Spatie splits filter values on commas, but `search` is a single
+                    // free-text term, so put the pieces back together.
+                    $parts = is_array($value) ? $value : [$value];
+                    $term = implode(',', array_filter($parts, is_string(...)));
+
+                    $query->where(function (Builder $q) use ($term): void {
+                        $q->where('title', 'like', "%{$term}%")
+                            ->orWhere('isbn', 'like', "%{$term}%")
+                            ->orWhere('publisher', 'like', "%{$term}%")
+                            ->orWhereHas('author', fn (Builder $q2) => $q2->where('name', 'like', "%{$term}%"));
                     });
                 }),
             )
