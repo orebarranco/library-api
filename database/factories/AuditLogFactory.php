@@ -26,10 +26,10 @@ final class AuditLogFactory extends Factory
             'user_id' => User::factory(),
             'action' => AuditAction::BookUpdated,
             'model_type' => class_basename(Book::class),
-            'model_id' => (string) $this->faker->uuid(),
-            'old_values' => ['title' => $this->faker->sentence(3)],
-            'new_values' => ['title' => $this->faker->sentence(3)],
-            'ip_address' => $this->faker->ipv4(),
+            'model_id' => (string) fake()->uuid(),
+            'old_values' => ['title' => fake()->sentence(3)],
+            'new_values' => ['title' => fake()->sentence(3)],
+            'ip_address' => fake()->ipv4(),
         ];
     }
 }
